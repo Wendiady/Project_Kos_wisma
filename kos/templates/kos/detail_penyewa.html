@@ -1,0 +1,207 @@
+{% extends 'kos/base_admin.html' %}
+
+{% block content %}
+
+<style>
+
+.container-detail{
+max-width:600px;
+margin:40px auto;
+background:white;
+padding:30px;
+border-radius:12px;
+box-shadow:0 8px 20px rgba(0,0,0,0.1);
+}
+
+.title{
+text-align:center;
+font-size:24px;
+font-weight:bold;
+margin-bottom:25px;
+color:#2c3e50;
+}
+
+.row{
+display:flex;
+justify-content:space-between;
+padding:10px 0;
+border-bottom:1px solid #eee;
+}
+
+.label{
+font-weight:bold;
+color:#555;
+}
+
+.value{
+color:#2c3e50;
+}
+
+/* badge fasilitas */
+.badge{
+background:#dff0ff;
+padding:6px 12px;
+border-radius:20px;
+margin:3px;
+display:inline-block;
+font-size:13px;
+}
+
+.ktp-box{
+text-align:center;
+margin-top:25px;
+}
+
+.ktp-box img{
+width:100%;
+max-width:300px;
+border-radius:10px;
+cursor:pointer;
+transition:0.3s;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+.ktp-box img:hover{
+transform:scale(1.05);
+}
+
+.btn-group{
+text-align:center;
+margin-top:25px;
+}
+
+.btn{
+display:inline-block;
+padding:10px 18px;
+margin:5px;
+border-radius:6px;
+text-decoration:none;
+color:white;
+font-size:14px;
+}
+
+.btn-back{
+background:#3498db;
+}
+
+.btn-edit{
+background:#2ecc71;
+}
+
+/* MODAL */
+.modal{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.8);
+justify-content:center;
+align-items:center;
+z-index:999;
+}
+
+.modal img{
+max-width:80%;
+max-height:80%;
+border-radius:10px;
+}
+
+</style>
+
+<div class="container-detail">
+
+<div class="title">Detail Penyewa</div>
+
+<div class="row">
+<span class="label">Nama</span>
+<span class="value">{{ penyewa.nama }}</span>
+</div>
+
+<div class="row">
+<span class="label">No HP</span>
+<span class="value">{{ penyewa.no_hp }}</span>
+</div>
+
+<div class="row">
+<span class="label">NIK</span>
+<span class="value">{{ penyewa.nik }}</span>
+</div>
+
+<div class="row">
+<span class="label">Kamar</span>
+<span class="value">
+{% if penyewa.kamar %}
+Kamar {{ penyewa.kamar.nomor_kamar }}
+{% else %}
+-
+{% endif %}
+</span>
+</div>
+
+<!-- 🔥 FASILITAS FINAL -->
+<div class="row">
+<span class="label">Fasilitas</span>
+<span class="value">
+{% for f in penyewa.fasilitas.all %}
+    <span class="badge">
+        {% if f.nama == "Wifi" %}📶{% endif %}
+        {% if f.nama == "AC" %}❄️{% endif %}
+        {% if f.nama == "Kipas Angin" %}🌀{% endif %}
+        {{ f.nama }}
+    </span>
+{% empty %}
+    <span style="color:red;">Tidak ada fasilitas</span>
+{% endfor %}
+</span>
+</div>
+
+<div class="row">
+<span class="label">Tanggal Masuk</span>
+<span class="value">{{ penyewa.tanggal_masuk }}</span>
+</div>
+
+<div class="row">
+<span class="label">Status</span>
+<span class="value">
+{% if penyewa.status == "Aktif" %}
+<span style="color:green;font-weight:bold;">Aktif</span>
+{% elif penyewa.status == "Pending" %}
+<span style="color:orange;font-weight:bold;">Pending</span>
+{% else %}
+<span style="color:red;font-weight:bold;">Keluar</span>
+{% endif %}
+</span>
+</div>
+
+<div class="ktp-box">
+<p><b>Foto KTP</b></p>
+
+{% if penyewa.foto_ktp %}
+<img src="{{ penyewa.foto_ktp.url }}" onclick="zoomImage(this.src)">
+{% else %}
+<p>Tidak ada foto</p>
+{% endif %}
+</div>
+
+<div class="btn-group">
+<a href="/penyewa/" class="btn btn-back">Kembali</a>
+<a href="/edit-penyewa/{{ penyewa.id }}" class="btn btn-edit">✏ Edit</a>
+</div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="imgModal" onclick="this.style.display='none'">
+<img id="imgZoom">
+</div>
+
+<script>
+function zoomImage(src){
+document.getElementById("imgModal").style.display = "flex";
+document.getElementById("imgZoom").src = src;
+}
+</script>
+
+{% endblock %}

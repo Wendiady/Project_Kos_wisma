@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Data Penyewa</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f5f5f5;
+padding:40px;
+}
+
+.top-menu{
+margin-bottom:20px;
+}
+
+.btn{
+display:inline-block;
+padding:8px 15px;
+background:#3b6e85;
+color:white;
+text-decoration:none;
+border-radius:5px;
+margin-right:10px;
+}
+
+.btn:hover{
+background:#2c5f73;
+}
+
+table{
+border-collapse:collapse;
+width:100%;
+background:white;
+}
+
+th,td{
+border:1px solid #ddd;
+padding:10px;
+text-align:center;
+}
+
+th{
+background:#3b6e85;
+color:white;
+}
+
+/* SEARCH */
+#searchInput{
+padding:8px;
+width:250px;
+margin-bottom:15px;
+border-radius:5px;
+border:1px solid #ccc;
+}
+
+/* MODAL */
+.modal{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.5);
+justify-content:center;
+align-items:center;
+}
+
+.modal-content{
+background:white;
+padding:20px;
+border-radius:8px;
+width:350px;
+text-align:left;
+}
+
+.close{
+float:right;
+cursor:pointer;
+color:red;
+font-weight:bold;
+}
+
+img{
+width:100%;
+margin-top:10px;
+border-radius:5px;
+}
+
+.action-btn{
+padding:5px 10px;
+border-radius:5px;
+text-decoration:none;
+color:white;
+font-size:12px;
+margin:2px;
+display:inline-block;
+}
+
+.btn-edit{
+background:#3498db;
+}
+
+.btn-edit:hover{
+background:#2980b9;
+}
+
+.btn-hapus{
+background:#e74c3c;
+}
+
+.btn-hapus:hover{
+background:#c0392b;
+}
+
+.btn-keluar{
+background:#f39c12;
+}
+
+.btn-keluar:hover{
+background:#d68910;
+}
+
+</style>
+
+<script>
+
+function showDetail(nama, no_hp, nik, kamar, wifi, tanggal, foto){
+    document.getElementById("d_nama").innerText = nama;
+    document.getElementById("d_hp").innerText = no_hp;
+    document.getElementById("d_nik").innerText = nik;
+    document.getElementById("d_kamar").innerText = kamar;
+    document.getElementById("d_wifi").innerText = wifi;
+    document.getElementById("d_tanggal").innerText = tanggal;
+
+    let img = document.getElementById("d_foto");
+
+    if(foto){
+        img.src = foto;
+        img.style.display = "block";
+    }else{
+        img.style.display = "none";
+    }
+
+    document.getElementById("modal").style.display = "flex";
+}
+
+function closeModal(){
+    document.getElementById("modal").style.display = "none";
+}
+
+// 🔍 SEARCH FUNCTION
+function searchPenyewa(){
+    let input = document.getElementById("searchInput").value.toLowerCase();
+    let rows = document.querySelectorAll("table tr");
+
+    rows.forEach((row, index) => {
+        if(index === 0) return; // skip header
+
+        let nama = row.children[0].innerText.toLowerCase();
+
+        if(nama.includes(input)){
+            row.style.display = "";
+        }else{
+            row.style.display = "none";
+        }
+    });
+}
+
+</script>
+
+</head>
+
+<body>
+
+<h2>Data Penyewa Kos Wisma 24</h2>
+
+<div class="top-menu">
+
+<a href="/" class="btn">Kembali</a>
+<a href="/tambah-penyewa/" class="btn">+ Tambah Penyewa</a>
+<a href="/riwayat-penyewa/" class="btn">📜 Riwayat Penyewa</a>
+
+</div>
+
+<input type="text" id="searchInput" placeholder="🔍 Cari penyewa..." onkeyup="searchPenyewa()">
+
+<table>
+
+<tr>
+    <th>Nama</th>
+    <th>No HP</th>
+    <th>Kamar</th>
+    <th>Fasilitas</th>
+    <th>Tanggal Masuk</th>
+    <th>Tanggal Keluar</th>
+    <th>Status</th>
+    <th>Aksi</th>
+</tr>
+
+{% for p in penyewa %}
+
+<tr>
+
+<td>
+<a href="{% url 'detail_penyewa' p.id %}" style="color:#2c5f73; font-weight:bold;">
+{{ p.nama }}
+</a>
+</td>
+
+<td>{{ p.no_hp }}</td>
+<td>{{ p.kamar.nomor_kamar }}</td>
+
+<td>
+{% for f in p.fasilitas.all %}
+    {{ f.nama }}{% if not forloop.last %}, {% endif %}
+{% empty %}
+    -
+{% endfor %}
+</td>
+
+<td>{{ p.tanggal_masuk }}</td>
+
+<!-- TANGGAL KELUAR -->
+<td>
+{% if p.tanggal_keluar %}
+{{ p.tanggal_keluar }}
+{% else %}
+-
+{% endif %}
+</td>
+
+<!-- STATUS -->
+<td>
+{% if p.status == "Aktif" %}
+<span style="color:green;font-weight:bold;">Aktif</span>
+{% else %}
+<span style="color:red;font-weight:bold;">Keluar</span>
+{% endif %}
+</td>
+
+<!-- AKSI -->
+<td>
+
+<a href="/edit-penyewa/{{p.id}}" class="action-btn btn-edit">
+Edit
+</a>
+
+<a href="/hapus-penyewa/{{p.id}}" 
+class="action-btn btn-hapus"
+onclick="return confirm('Yakin ingin hapus data?')">
+Hapus
+</a>
+
+<a href="/keluar-penyewa/{{p.id}}" 
+class="action-btn btn-keluar"
+onclick="return confirm('Yakin penyewa keluar?')">
+Keluar
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}

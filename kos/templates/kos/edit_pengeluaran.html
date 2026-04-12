@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Edit Pengeluaran</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f5f5f5;
+padding:40px;
+}
+
+/* CARD */
+.card{
+background:white;
+padding:25px;
+width:400px;
+margin:auto;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+/* JUDUL */
+h2{
+text-align:center;
+margin-bottom:20px;
+}
+
+/* LABEL */
+label{
+display:block;
+margin-top:10px;
+font-weight:bold;
+}
+
+/* INPUT */
+input, select{
+width:100%;
+padding:8px;
+margin-top:5px;
+border-radius:5px;
+border:1px solid #ccc;
+}
+
+/* BUTTON */
+button{
+margin-top:15px;
+width:100%;
+padding:10px;
+background:#3b6e85;
+color:white;
+border:none;
+border-radius:5px;
+cursor:pointer;
+}
+
+button:hover{
+background:#2c5f73;
+}
+
+/* BACK BUTTON */
+.btn-back{
+display:inline-block;
+text-decoration:none;
+color:#3b6e85;
+background:#eaf3f7;
+padding:8px 15px;
+border-radius:20px;
+margin-bottom:20px;
+font-weight:bold;
+}
+
+.btn-back:hover{
+background:#d5e8f1;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<a href="/pengeluaran/" class="btn-back">← Kembali</a>
+
+<div class="card">
+
+<h2>Edit Pengeluaran</h2>
+
+<form method="POST">
+{% csrf_token %}
+
+<label>Tanggal</label>
+<input type="date" name="tanggal" value="{{ data.tanggal|date:'Y-m-d' }}" required>
+
+<label>Kategori</label>
+<select name="kategori">
+<option value="Listrik" {% if data.kategori == "Listrik" %}selected{% endif %}>Listrik</option>
+<option value="Wifi" {% if data.kategori == "Wifi" %}selected{% endif %}>Wifi</option>
+<option value="Air" {% if data.kategori == "Air" %}selected{% endif %}>Air</option>
+<option value="Perawatan" {% if data.kategori == "Perawatan" %}selected{% endif %}>Perawatan</option>
+<option value="Lainnya" {% if data.kategori == "Lainnya" %}selected{% endif %}>Lainnya</option>
+</select>
+
+<label>Keterangan</label>
+<input type="text" name="keterangan" value="{{ data.keterangan }}" required>
+
+<label>Jumlah</label>
+<input type="number" name="jumlah" value="{{ data.jumlah }}" required>
+
+<button type="submit">Update</button>
+
+</form>
+
+</div>
+
+</body>
+</html>

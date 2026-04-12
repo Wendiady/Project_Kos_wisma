@@ -1,0 +1,24 @@
+{% extends 'kos/base_user.html' %}
+
+{% block content %}
+
+<h2>Pilih Fasilitas</h2>
+
+<form method="POST">
+{% csrf_token %}
+
+<div style="margin-top:20px;">
+{% for f in fasilitas %}
+    <label style="display:block; margin-bottom:10px;">
+        <input type="checkbox" name="fasilitas" value="{{ f.id }}"
+        {% if f in penyewa.fasilitas.all %}checked{% endif %}>
+        {{ f.nama }}
+    </label>
+{% endfor %}
+</div>
+
+<button type="submit" class="btn">Simpan</button>
+
+</form>
+
+{% endblock %}

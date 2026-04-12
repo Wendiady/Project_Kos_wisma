@@ -1,0 +1,112 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html>
+<head>
+<title>Edit Tagihan</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f5f5f5;
+padding:40px;
+}
+
+.card{
+background:white;
+padding:30px;
+max-width:500px;
+margin:auto;
+border-radius:8px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+input,select{
+width:100%;
+padding:10px;
+margin-bottom:15px;
+border:1px solid #ccc;
+border-radius:4px;
+}
+
+button{
+padding:10px 15px;
+background:#3b6e85;
+color:white;
+border:none;
+cursor:pointer;
+border-radius:4px;
+}
+
+button:hover{
+background:#2c5f73;
+}
+
+.info{
+font-size:13px;
+color:#777;
+margin-top:-10px;
+margin-bottom:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>Edit Tagihan</h2>
+
+<form method="POST">
+{% csrf_token %}
+
+<label>Bulan</label>
+<input type="text" name="bulan" value="{{ tagihan.bulan }}" required>
+
+<label>Tahun</label>
+<input type="number" name="tahun" value="{{ tagihan.tahun }}" required>
+
+<label>Total Tagihan</label>
+<input type="text" value="Rp {{ tagihan.total }}" readonly>
+<small>Total mengikuti harga kamar</small>
+
+<label>Jumlah Dibayar</label>
+<input type="number" name="dibayar" value="{{ tagihan.dibayar }}">
+
+<label>Tanggal Jatuh Tempo</label>
+<input type="date" name="jatuh_tempo" value="{{ tagihan.jatuh_tempo|date:'Y-m-d' }}">
+
+<label>Status</label>
+
+<select name="status">
+
+<option value="Belum Bayar"
+{% if tagihan.status == "Belum Bayar" %}selected{% endif %}
+>
+Belum Bayar
+</option>
+
+<option value="Masih Utang"
+{% if tagihan.status == "Masih Utang" %}selected{% endif %}
+>
+Masih Utang
+</option>
+
+<option value="Lunas"
+{% if tagihan.status == "Lunas" %}selected{% endif %}
+>
+Lunas
+</option>
+
+</select>
+
+<button type="submit">Simpan</button>
+
+</form>
+
+</div>
+
+</body>
+</html>

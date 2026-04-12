@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Edit Penyewa</title>
+
+<style>
+body{
+    font-family:Arial;
+    background:#f5f5f5;
+    padding:40px;
+}
+
+.card{
+    background:white;
+    padding:30px;
+    max-width:500px;
+    margin:auto;
+    border-radius:8px;
+    box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+input, select{
+    width:100%;
+    padding:10px;
+    margin-bottom:15px;
+}
+
+button{
+    :10px 15px;
+    background:#3b6e85;
+    color:white;
+    border:none;
+}
+
+/* checkbox fasilitas */
+.fasilitas{
+    margin-bottom:15px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>Edit Penyewa</h2>
+
+<form method="POST">
+{% csrf_token %}
+
+<label>Nama</label>
+<input type="text" name="nama" value="{{penyewa.nama}}">
+
+<label>No HP</label>
+<input type="text" name="no_hp" value="{{penyewa.no_hp}}">
+
+<!-- 🔥 FASILITAS -->
+<label>Fasilitas</label>
+<div class="fasilitas">
+{% for f in fasilitas %}
+<label>
+<input type="checkbox" name="fasilitas" value="{{ f.id }}"
+{% if f in penyewa.fasilitas.all %}checked{% endif %}>
+{{ f.nama }}
+</label><br>
+{% endfor %}
+</div>
+
+<label>Kamar</label>
+<select name="kamar">
+{% for k in kamar %}
+<option value="{{k.id}}"
+{% if penyewa.kamar.id == k.id %}selected{% endif %}>
+Kamar {{k.nomor_kamar}}
+</option>
+{% endfor %}
+</select>
+
+<label>Tanggal Masuk</label>
+<input type="date" name="tanggal_masuk" value="{{penyewa.tanggal_masuk|date:'Y-m-d'}}">
+
+<button type="submit">Update</button>
+
+</form>
+
+</div>
+
+</body>
+</html>

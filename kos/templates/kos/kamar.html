@@ -1,0 +1,121 @@
+{% extends 'kos/base_admin.html' %}
+
+{% block title %}Data Kamar{% endblock %}
+
+{% block content %}
+
+<style>
+.container-kamar{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+}
+
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+.btn-tambah{
+    background:#3b6e85;
+    color:white;
+    padding:8px 12px;
+    border-radius:6px;
+    text-decoration:none;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th, td{
+    padding:10px;
+    border:1px solid #ddd;
+    text-align:center;
+}
+
+/* STATUS */
+.status-kosong{
+    background:#28a745;
+    color:white;
+    padding:5px 10px;
+    border-radius:5px;
+}
+
+.status-terisi{
+    background:#dc3545;
+    color:white;
+    padding:5px 10px;
+    border-radius:5px;
+}
+
+/* BUTTON */
+.btn-edit{
+    background:#ffc107;
+    padding:5px 8px;
+    border-radius:5px;
+    color:black;
+    text-decoration:none;
+}
+
+.btn-hapus{
+    background:#dc3545;
+    padding:5px 8px;
+    border-radius:5px;
+    color:white;
+    text-decoration:none;
+}
+</style>
+
+<div class="container-kamar">
+
+    <div class="header">
+        <h2>Data Kamar</h2>
+        <a href="/tambah-kamar/" class="btn-tambah">+ Tambah Kamar</a>
+    </div>
+
+    <table>
+        <tr>
+            <th>No Kamar</th>
+            <th>Harga</th>
+            <th>Status</th>
+            <th>Penghuni</th>
+            <th>Aksi</th>
+        </tr>
+
+        {% for k in kamar %}
+        <tr>
+            <td>{{ k.nomor_kamar }}</td>
+            <td>{{ k.harga }}</td>
+
+            <td>
+                {% if k.status == "Kosong" %}
+                    <span class="status-kosong">{{ k.status }}</span>
+                {% else %}
+                    <span class="status-terisi">{{ k.status }}</span>
+                {% endif %}
+            </td>
+
+            <td>
+                {% if k.penyewa_set.first %}
+                    {{ k.penyewa_set.first.nama }}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+
+            <td>
+                <a href="/edit-kamar/{{ k.id }}/" class="btn-edit">Edit</a>
+                <a href="/hapus-kamar/{{ k.id }}/" class="btn-hapus">Hapus</a>
+            </td>
+        </tr>
+        {% endfor %}
+
+    </table>
+
+</div>
+
+{% endblock %}

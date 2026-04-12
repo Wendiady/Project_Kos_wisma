@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register Penyewa</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f5f5f5;
+            padding: 40px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            max-width: 400px;
+            margin: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #3b6e85;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #2c5f73;
+        }
+
+        .error {
+            color: red;
+            margin-bottom: 10px;
+        }
+
+        .success {
+            color: green;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+
+    <h2>Register Penyewa</h2>
+
+    <!-- 🔥 MESSAGE -->
+    {% if messages %}
+        {% for message in messages %}
+            <p class="{% if message.tags == 'error' %}error{% else %}success{% endif %}">
+                {{ message }}
+            </p>
+
+            <!-- 🔥 AUTO REDIRECT KE LOGIN -->
+            {% if message.tags == 'success' %}
+                <script>
+                    setTimeout(function(){
+                        window.location.href = "/login-penyewa/";
+                    }, 2000); // 2 detik pindah ke login
+                </script>
+            {% endif %}
+
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" action="/register-penyewa/">
+        {% csrf_token %}
+
+        <label>Nama</label>
+        <input type="text" name="nama" required>
+
+        <label>Username</label>
+        <input type="text" name="username" required>
+
+        <label>Password</label>
+        <input type="password" name="password" required>
+
+        <label>Tanggal Masuk</label>
+        <input type="date" name="tanggal_masuk" required>
+
+        <button type="submit">Daftar</button>
+    </form>
+
+    <br>
+    <a href="/login-penyewa/">Sudah punya akun? Login</a>
+
+</div>
+
+</body>
+</html>

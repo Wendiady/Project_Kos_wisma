@@ -1,0 +1,15 @@
+<form method="POST">
+    {% csrf_token %}
+
+    <select name="kamar" required>
+        <option value="">-- Pilih Kamar --</option>
+
+        {% for k in kamar_list %}
+            <option value="{{ k.id }}">
+                Kamar {{ k.nomor_kamar }} - Rp {{ k.harga }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Pilih</button>
+</form>

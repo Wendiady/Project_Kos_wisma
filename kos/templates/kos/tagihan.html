@@ -1,0 +1,185 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html>
+<head>
+<title>Data Tagihan</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f5f5f5;
+padding:40px;
+}
+
+h2{
+margin-bottom:20px;
+}
+
+.top-menu{
+margin-bottom:20px;
+}
+
+.btn{
+display:inline-block;
+padding:8px 15px;
+background:#3b6e85;
+color:white;
+text-decoration:none;
+border-radius:5px;
+margin-right:10px;
+}
+
+.btn:hover{
+background:#2c5f73;
+}
+
+/* CARD BULAN */
+.bulan-box{
+margin-top:30px;
+background:white;
+padding:15px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+/* HEADER BULAN */
+.bulan-title{
+background:#3b6e85;
+color:white;
+padding:10px;
+border-radius:5px;
+margin-bottom:10px;
+font-weight:bold;
+}
+
+/* TABLE */
+table{
+border-collapse:collapse;
+width:100%;
+}
+
+th,td{
+border:1px solid #ddd;
+padding:10px;
+text-align:center;
+}
+
+th{
+background:#3b6e85;
+color:white;
+}
+
+/* STATUS */
+.status-lunas{
+background:#4CAF50;
+color:white;
+padding:4px 10px;
+border-radius:5px;
+}
+
+.status-belum{
+background:#f44336;
+color:white;
+padding:4px 10px;
+border-radius:5px;
+}
+
+.status-utang{
+background:#ff9800;
+color:white;
+padding:4px 10px;
+border-radius:5px;
+}
+
+/* NAMA */
+.nama-penyewa a{
+text-decoration:none;
+color:#2c5f73;
+font-weight:bold;
+}
+
+/* AKSI */
+.aksi{
+display:flex;
+justify-content:center;
+gap:10px;
+}
+
+.edit{ color:#ff9800; }
+.hapus{ color:#f44336; }
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Data Tagihan Kos Wisma 24</h2>
+
+<div class="top-menu">
+<a href="/" class="btn">Kembali</a>
+<a href="/tambah-tagihan/" class="btn">+ Tambah Tagihan</a>
+</div>
+
+<!-- LOOP PER BULAN -->
+{% for bulan, items in grouped_tagihan.items %}
+
+<div class="bulan-box">
+
+<div class="bulan-title">
+📅 {{ bulan }}
+</div>
+
+<table>
+
+<tr>
+<th>Nama</th>
+<th>Total</th>
+<th>Dibayar</th>
+<th>Sisa</th>
+<th>Status</th>
+<th>Aksi</th>
+</tr>
+
+{% for t in items %}
+<tr>
+
+<td class="nama-penyewa">
+<a href="/tagihan/{{ t.id }}/">👁 {{ t.penyewa.nama }}</a>
+</td>
+
+<td>Rp {{ t.total|intcomma }}</td>
+<td>Rp {{ t.dibayar|intcomma }}</td>
+<td>Rp {{ t.sisa|intcomma }}</td>
+
+<td>
+{% if t.status == "Lunas" %}
+<span class="status-lunas">Lunas</span>
+
+{% elif t.status == "Masih Utang" %}
+<span class="status-utang">Masih Utang</span>
+
+{% else %}
+<span class="status-belum">Belum Bayar</span>
+{% endif %}
+</td>
+
+<td>
+<div class="aksi">
+<a href="/edit-tagihan/{{t.id}}" class="edit">✏</a>
+<a href="/hapus-tagihan/{{t.id}}" class="hapus">🗑</a>
+</div>
+</td>
+
+</tr>
+{% endfor %}
+
+</table>
+
+</div>
+
+{% endfor %}
+
+</body>
+</html>

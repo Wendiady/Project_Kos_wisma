@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tambah Pembayaran</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f5f5f5;
+padding:40px;
+}
+
+.card{
+background:white;
+padding:30px;
+max-width:500px;
+margin:auto;
+border-radius:8px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+input,select{
+width:100%;
+padding:10px;
+margin-bottom:15px;
+}
+
+button{
+padding:10px 15px;
+background:#3b6e85;
+color:white;
+border:none;
+cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>Tambah Pembayaran</h2>
+
+<form method="POST">
+{% csrf_token %}
+
+<label>Tagihan Penyewa</label>
+<select name="tagihan">
+
+{% for t in tagihan %}
+<option value="{{t.id}}">
+{{t.penyewa.nama}} - {{t.bulan}} {{t.tahun}}
+</option>
+{% endfor %}
+
+</select>
+
+<label>Jumlah Bayar</label>
+<input type="number" name="jumlah_bayar">
+
+<button type="submit">Simpan</button>
+
+</form>
+
+</div>
+
+</body>
+</html>

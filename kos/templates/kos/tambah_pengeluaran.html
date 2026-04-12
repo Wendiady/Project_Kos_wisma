@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tambah Pengeluaran</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f5f5f5;
+padding:40px;
+}
+
+.card{
+background:white;
+padding:25px;
+width:400px;
+margin:auto;
+border-radius:8px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+h2{
+text-align:center;
+margin-bottom:20px;
+}
+
+label{
+display:block;
+margin-top:10px;
+font-weight:bold;
+}
+
+input, select{
+width:100%;
+padding:8px;
+margin-top:5px;
+border-radius:5px;
+border:1px solid #ccc;
+}
+
+button{
+margin-top:15px;
+width:100%;
+padding:10px;
+background:#3b6e85;
+color:white;
+border:none;
+border-radius:5px;
+cursor:pointer;
+}
+
+button:hover{
+background:#2c5f73;
+}
+
+.btn-back{
+display:inline-block;
+text-decoration:none;
+color:#3b6e85;
+background:#eaf3f7;
+padding:8px 15px;
+border-radius:20px;
+margin-bottom:20px;
+font-weight:bold;
+transition:0.3s;
+}
+
+.btn-back:hover{
+background:#d5e8f1;
+}
+</style>
+
+</head>
+
+<body>
+
+<div style="margin-bottom:20px;">
+<a href="/pengeluaran/" class="btn-back">← Kembali</a>
+</div>
+<div class="card">
+
+<h2>Tambah Pengeluaran</h2>
+
+<form method="POST">
+{% csrf_token %}
+
+<label>Tanggal</label>
+<input type="date" name="tanggal" required>
+
+<label>Kategori</label>
+<select name="kategori" required>
+<option value="Listrik">Listrik</option>
+<option value="Wifi">Wifi</option>
+<option value="Air">Air</option>
+<option value="Perawatan">Perawatan</option>
+<option value="Lainnya">Lainnya</option>
+</select>
+
+<!-- 🔥 INI YANG KURANG -->
+<label>Keterangan</label>
+<input type="text" name="keterangan" required>
+
+<label>Jumlah</label>
+<input type="number" name="jumlah" required>
+
+<button type="submit">Simpan</button>
+
+</form>
+
+</div>
+
+</body>
+</html>

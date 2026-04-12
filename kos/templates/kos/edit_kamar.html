@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Edit Kamar</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f5f5f5;
+padding:40px;
+}
+
+.card{
+background:white;
+padding:30px;
+max-width:500px;
+margin:auto;
+border-radius:8px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+input, select{
+width:100%;
+padding:10px;
+margin-bottom:15px;
+}
+
+button{
+padding:10px 15px;
+background:#3b6e85;
+color:white;
+border:none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>Edit Kamar</h2>
+
+<form method="POST">
+{% csrf_token %}
+
+<label>Nomor Kamar</label>
+<input type="text" name="nomor_kamar" value="{{ kamar.nomor_kamar }}">
+
+<label>Harga</label>
+<input type="number" name="harga" value="{{ kamar.harga }}">
+
+<label>Status</label>
+<select name="status">
+
+<option value="Kosong"
+{% if kamar.status == "Kosong" %}selected{% endif %}>
+Kosong
+</option>
+
+<option value="Terisi"
+{% if kamar.status == "Terisi" %}selected{% endif %}>
+Terisi
+</option>
+
+</select>
+
+<button type="submit">Update</button>
+
+</form>
+
+</div>
+
+</body>
+</html>

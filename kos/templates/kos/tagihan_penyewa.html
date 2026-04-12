@@ -1,0 +1,46 @@
+{% extends 'kos/base_user.html' %}
+
+{% block title %}Tagihan Saya{% endblock %}
+
+{% block content %}
+
+<h2>Tagihan Saya</h2>
+
+<table border="1" cellpadding="10" cellspacing="0" style="width:100%; background:white;">
+    <tr style="background:#3498db; color:white;">
+        <th>Bulan</th>
+        <th>Tahun</th>
+        <th>Total</th>
+        <th>Dibayar</th>
+        <th>Sisa</th>
+        <th>Status</th>
+    </tr>
+
+    {% for t in tagihan %}
+    <tr>
+        <td>{{ t.bulan }}</td>
+        <td>{{ t.tahun }}</td>
+        <td>Rp {{ t.total }}</td>
+        <td>Rp {{ t.dibayar }}</td>
+        <td>Rp {{ t.sisa }}</td>
+        <td>
+            {% if t.status == "Lunas" %}
+                <span style="color:green;">✔ Lunas</span>
+            {% elif t.status == "Masih Utang" %}
+                <span style="color:orange;">⚠ Utang</span>
+            {% else %}
+                <span style="color:red;">✖ Belum Bayar</span>
+            {% endif %}
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="6" style="text-align:center;">Belum ada tagihan</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<br>
+<a href="{% url 'dashboard_penyewa' %}" class="btn">Kembali</a>
+
+{% endblock %}

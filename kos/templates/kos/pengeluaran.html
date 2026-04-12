@@ -1,0 +1,206 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html>
+<head>
+<title>Data Pengeluaran</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f5f5f5;
+padding:40px;
+}
+
+/* HEADER */
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+margin-bottom:20px;
+gap:10px;
+}
+
+/* GROUP BUTTON */
+.nav-btn{
+display:flex;
+gap:10px;
+}
+
+/* BUTTON */
+.btn{
+padding:8px 15px;
+background:#3b6e85;
+color:white;
+text-decoration:none;
+border-radius:5px;
+border:none;
+cursor:pointer;
+}
+
+.btn:hover{
+background:#2c5f73;
+}
+
+/* DASHBOARD BUTTON */
+.btn-dashboard{
+background:#3b6e85;;
+}
+
+.btn-dashboard:hover{
+background:#555;
+}
+
+/* FILTER */
+.filter-form{
+display:flex;
+gap:10px;
+align-items:center;
+flex-wrap:wrap;
+}
+
+.filter-form select{
+padding:7px;
+border-radius:5px;
+border:1px solid #ccc;
+}
+
+/* TABLE */
+table{
+width:100%;
+border-collapse:collapse;
+background:white;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+th,td{
+border:1px solid #ddd;
+padding:10px;
+text-align:center;
+}
+
+th{
+background:#3b6e85;
+color:white;
+}
+
+/* ZEBRA */
+tr:nth-child(even){
+background:#f9f9f9;
+}
+
+/* ACTION */
+.action a{
+margin:3px;
+padding:5px 10px;
+border-radius:5px;
+color:white;
+text-decoration:none;
+}
+
+.edit{ background:#3498db; }
+.hapus{ background:#e74c3c; }
+
+.edit:hover{ background:#2980b9; }
+.hapus:hover{ background:#c0392b; }
+
+/* TOTAL */
+.total{
+margin-top:20px;
+font-size:18px;
+font-weight:bold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Data Pengeluaran Kos Wisma 24</h2>
+
+<!-- HEADER -->
+<div class="header">
+
+    <div class="nav-btn">
+        <a href="/" class="btn btn-dashboard">Kembali</a>
+        <a href="/tambah-pengeluaran/" class="btn">+ Tambah</a>
+    </div>
+
+    <!-- FILTER -->
+    <form method="GET" class="filter-form">
+
+        <select name="bulan">
+            <option value="">Bulan</option>
+
+            <option value="1" {% if bulan == "1" %}selected{% endif %}>Januari</option>
+            <option value="2" {% if bulan == "2" %}selected{% endif %}>Februari</option>
+            <option value="3" {% if bulan == "3" %}selected{% endif %}>Maret</option>
+            <option value="4" {% if bulan == "4" %}selected{% endif %}>April</option>
+            <option value="5" {% if bulan == "5" %}selected{% endif %}>Mei</option>
+            <option value="6" {% if bulan == "6" %}selected{% endif %}>Juni</option>
+            <option value="7" {% if bulan == "7" %}selected{% endif %}>Juli</option>
+            <option value="8" {% if bulan == "8" %}selected{% endif %}>Agustus</option>
+            <option value="9" {% if bulan == "9" %}selected{% endif %}>September</option>
+            <option value="10" {% if bulan == "10" %}selected{% endif %}>Oktober</option>
+            <option value="11" {% if bulan == "11" %}selected{% endif %}>November</option>
+            <option value="12" {% if bulan == "12" %}selected{% endif %}>Desember</option>
+        </select>
+
+        <select name="tahun">
+            <option value="">Tahun</option>
+
+            {% for t in tahun_list %}
+            <option value="{{ t.year }}" {% if tahun == t.year|stringformat:"s" %}selected{% endif %}>
+                {{ t.year }}
+            </option>
+            {% endfor %}
+
+        </select>
+
+        <button type="submit" class="btn">Filter</button>
+
+    </form>
+
+</div>
+
+<!-- TABLE -->
+<table>
+
+<tr>
+<th>Tanggal</th>
+<th>Kategori</th>
+<th>Keterangan</th>
+<th>Jumlah</th>
+<th>Aksi</th>
+</tr>
+
+{% for p in pengeluaran %}
+<tr>
+<td>{{ p.tanggal }}</td>
+<td>{{ p.kategori }}</td>
+<td>{{ p.keterangan }}</td>
+<td>Rp {{ p.jumlah|intcomma }}</td>
+
+<td class="action">
+<a href="/edit-pengeluaran/{{p.id}}" class="edit">Edit</a>
+<a href="/hapus-pengeluaran/{{p.id}}" class="hapus" 
+onclick="return confirm('Yakin hapus?')">Hapus</a>
+</td>
+
+</tr>
+{% empty %}
+<tr>
+<td colspan="5">Tidak ada data</td>
+</tr>
+{% endfor %}
+
+</table>
+
+<div class="total">
+Total Pengeluaran: Rp {{ total_pengeluaran|intcomma }}
+</div>
+
+</body>
+</html>

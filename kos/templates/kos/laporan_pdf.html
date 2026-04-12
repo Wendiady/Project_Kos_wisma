@@ -1,0 +1,137 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html>
+<head>
+<title>Laporan PDF</title>
+
+<style>
+body{
+font-family:Arial;
+padding:40px;
+color:#333;
+}
+
+h1{
+text-align:center;
+margin-bottom:5px;
+}
+
+.sub{
+text-align:center;
+margin-bottom:30px;
+font-size:14px;
+}
+
+/* SECTION */
+h3{
+margin-top:30px;
+margin-bottom:10px;
+}
+
+/* TABLE */
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+}
+
+th{
+background:#3b6e85;
+color:white;
+padding:10px;
+text-align:center;
+}
+
+td{
+padding:10px;
+border:1px solid #ccc;
+text-align:center;
+}
+
+/* TOTAL */
+.total{
+margin-top:10px;
+font-weight:bold;
+text-align:right;
+}
+
+/* SALDO */
+.saldo{
+margin-top:25px;
+font-size:16px;
+font-weight:bold;
+text-align:right;
+}
+
+/* GARIS */
+hr{
+margin:25px 0;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>LAPORAN KEUANGAN KOS WISMA 24</h1>
+<p class="sub">Tanggal Cetak: {{ today|date:"d F Y" }}</p>
+
+<!-- PEMASUKAN -->
+<h3>Detail Pemasukan</h3>
+
+<table>
+<tr>
+<th>Nama</th>
+<th>Bulan</th>
+<th>Total</th>
+</tr>
+
+{% for t in pemasukan_detail %}
+<tr>
+<td>{{ t.penyewa.nama }}</td>
+<td>{{ t.bulan }} {{ t.tahun }}</td>
+<td>Rp {{ t.total|intcomma }}</td>
+</tr>
+{% empty %}
+<tr><td colspan="3">Tidak ada pemasukan</td></tr>
+{% endfor %}
+</table>
+
+<p class="total">
+Total Pemasukan: Rp {{ total_pemasukan|intcomma }}
+</p>
+
+<hr>
+
+<!-- PENGELUARAN -->
+<h3>Detail Pengeluaran</h3>
+
+<table>
+<tr>
+<th>Tanggal</th>
+<th>Keterangan</th>
+<th>Jumlah</th>
+</tr>
+
+{% for p in pengeluaran %}
+<tr>
+<td>{{ p.tanggal|date:"d F Y" }}</td>
+<td>{{ p.keterangan }}</td>
+<td>Rp {{ p.jumlah|intcomma }}</td>
+</tr>
+{% empty %}
+<tr><td colspan="3">Tidak ada pengeluaran</td></tr>
+{% endfor %}
+</table>
+
+<p class="total">
+Total Pengeluaran: Rp {{ total_pengeluaran|intcomma }}
+</p>
+
+<!-- SALDO -->
+<p class="saldo">
+Saldo Akhir: Rp {{ saldo_kos|intcomma }}
+</p>
+
+</body>
+</html>

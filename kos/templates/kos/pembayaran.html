@@ -1,0 +1,173 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html>
+<head>
+<title>Data Pembayaran Kos</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f5f5f5;
+padding:40px;
+}
+
+h2{
+margin-bottom:20px;
+}
+
+.btn{
+display:inline-block;
+padding:8px 15px;
+background:#3b6e85;
+color:white;
+text-decoration:none;
+border-radius:5px;
+margin-bottom:20px;
+}
+
+.btn:hover{
+background:#2c5f73;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:6px;
+margin-bottom:25px;
+box-shadow:0 0 8px rgba(0,0,0,0.1);
+}
+
+label{
+margin-right:10px;
+font-weight:bold;
+}
+
+select,input{
+padding:6px;
+margin-right:10px;
+}
+
+button{
+padding:7px 15px;
+background:#3b6e85;
+color:white;
+border:none;
+border-radius:5px;
+cursor:pointer;
+}
+
+button:hover{
+background:#2c5f73;
+}
+
+table{
+border-collapse:collapse;
+width:100%;
+background:white;
+box-shadow:0 0 8px rgba(0,0,0,0.1);
+}
+
+th,td{
+border:1px solid #ddd;
+padding:10px;
+text-align:center;
+}
+
+th{
+background:#3b6e85;
+color:white;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Data Pembayaran Kos</h2>
+
+<a href="/" class="btn">Kembali</a>
+
+<div class="card">
+
+<form method="POST">
+{% csrf_token %}
+
+<label>Pilih Tagihan</label>
+
+<select name="tagihan">
+
+{% for bulan, items in grouped_tagihan.items %}
+
+<optgroup label="📅 {{ bulan }}" style="color:#3b6e85; font-weight:bold;">
+
+    {% for t in items %}
+    <option value="{{ t.id }}"
+    {% if t.id == selected_tagihan %}selected{% endif %}
+    >
+        {{ t.penyewa.nama }} - {{ bulan }}
+    </option>
+    {% endfor %}
+
+</optgroup>
+
+{% endfor %}
+
+</select>
+
+<label>Jumlah Bayar</label>
+<input type="number" name="jumlah_bayar" required>
+
+<button type="submit">Simpan Pembayaran</button>
+
+</form>
+
+</div>
+
+<table>
+
+<tr>
+<th>Penyewa</th>
+<th>Bulan</th>
+<th>Total Tagihan</th>
+<th>Sisa Tagihan</th>
+<th>Tanggal Bayar</th>
+<th>Jumlah Bayar</th>
+<th>Aksi</th>
+</tr>
+
+{% for p in pembayaran %}
+
+<tr>
+
+<td>{{ p.tagihan.penyewa.nama }}</td>
+
+<td>{{ p.tagihan.bulan }} {{ p.tagihan.tahun }}</td>
+
+<td>Rp {{ p.tagihan.total|intcomma }}</td>
+
+<td>Rp {{ p.sisa|intcomma }}</td>
+
+<td>{{ p.tanggal_bayar|date:"d F Y" }}</td>
+
+<td>Rp {{ p.jumlah_bayar|intcomma }}</td>
+
+<td>
+<a href="/hapus-pembayaran/{{ p.id }}" style="color:red;">Hapus</a>
+</td>
+
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="6">Belum ada pembayaran</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+</body>
+</html>
