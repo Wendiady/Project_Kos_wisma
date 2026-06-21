@@ -5,7 +5,7 @@
 <style>
 
 .container-detail{
-max-width:600px;
+max-width:650px;
 margin:40px auto;
 background:white;
 padding:30px;
@@ -24,7 +24,7 @@ color:#2c3e50;
 .row{
 display:flex;
 justify-content:space-between;
-padding:10px 0;
+padding:12px 0;
 border-bottom:1px solid #eee;
 }
 
@@ -47,6 +47,23 @@ display:inline-block;
 font-size:13px;
 }
 
+/* status warna */
+.status-aktif{
+color:green;
+font-weight:bold;
+}
+
+.status-pending{
+color:orange;
+font-weight:bold;
+}
+
+.status-keluar{
+color:red;
+font-weight:bold;
+}
+
+/* KTP */
 .ktp-box{
 text-align:center;
 margin-top:25px;
@@ -54,7 +71,7 @@ margin-top:25px;
 
 .ktp-box img{
 width:100%;
-max-width:300px;
+max-width:320px;
 border-radius:10px;
 cursor:pointer;
 transition:0.3s;
@@ -65,6 +82,7 @@ box-shadow:0 4px 10px rgba(0,0,0,0.1);
 transform:scale(1.05);
 }
 
+/* tombol */
 .btn-group{
 text-align:center;
 margin-top:25px;
@@ -114,21 +132,49 @@ border-radius:10px;
 
 <div class="title">Detail Penyewa</div>
 
+<!-- NAMA -->
 <div class="row">
 <span class="label">Nama</span>
 <span class="value">{{ penyewa.nama }}</span>
 </div>
 
+<!-- NO HP -->
 <div class="row">
 <span class="label">No HP</span>
-<span class="value">{{ penyewa.no_hp }}</span>
+<span class="value">
+{% if penyewa.no_hp %}
+{{ penyewa.no_hp }}
+{% else %}
+<span style="color:red;">Belum diisi</span>
+{% endif %}
+</span>
 </div>
 
+<!-- NIK -->
 <div class="row">
 <span class="label">NIK</span>
-<span class="value">{{ penyewa.nik }}</span>
+<span class="value">
+{% if penyewa.nik %}
+{{ penyewa.nik }}
+{% else %}
+<span style="color:red;">Belum diisi</span>
+{% endif %}
+</span>
 </div>
 
+<!-- IDENTITAS -->
+<div class="row">
+<span class="label">Status Data</span>
+<span class="value">
+{% if penyewa.nik and penyewa.foto_ktp %}
+✔ Lengkap
+{% else %}
+<span style="color:red;">Belum lengkap</span>
+{% endif %}
+</span>
+</div>
+
+<!-- KAMAR -->
 <div class="row">
 <span class="label">Kamar</span>
 <span class="value">
@@ -140,15 +186,16 @@ Kamar {{ penyewa.kamar.nomor_kamar }}
 </span>
 </div>
 
-<!-- 🔥 FASILITAS FINAL -->
+<!-- FASILITAS -->
 <div class="row">
 <span class="label">Fasilitas</span>
 <span class="value">
 {% for f in penyewa.fasilitas.all %}
     <span class="badge">
-        {% if f.nama == "Wifi" %}📶{% endif %}
+        {% if f.nama == "WiFi" %}📶{% endif %}
         {% if f.nama == "AC" %}❄️{% endif %}
         {% if f.nama == "Kipas Angin" %}🌀{% endif %}
+        {% if f.nama == "Rice Cooker" %}🍚{% endif %}
         {{ f.nama }}
     </span>
 {% empty %}
@@ -157,34 +204,43 @@ Kamar {{ penyewa.kamar.nomor_kamar }}
 </span>
 </div>
 
+<!-- TANGGAL -->
 <div class="row">
 <span class="label">Tanggal Masuk</span>
 <span class="value">{{ penyewa.tanggal_masuk }}</span>
 </div>
 
+<!-- STATUS -->
 <div class="row">
 <span class="label">Status</span>
 <span class="value">
 {% if penyewa.status == "Aktif" %}
-<span style="color:green;font-weight:bold;">Aktif</span>
+<span class="status-aktif">Aktif</span>
 {% elif penyewa.status == "Pending" %}
-<span style="color:orange;font-weight:bold;">Pending</span>
+<span class="status-pending">Pending</span>
 {% else %}
-<span style="color:red;font-weight:bold;">Keluar</span>
+<span class="status-keluar">Keluar</span>
 {% endif %}
 </span>
 </div>
 
+<!-- KTP -->
 <div class="ktp-box">
 <p><b>Foto KTP</b></p>
 
 {% if penyewa.foto_ktp %}
 <img src="{{ penyewa.foto_ktp.url }}" onclick="zoomImage(this.src)">
+<p style="margin-top:10px; font-size:13px; color:#666;">
+Klik gambar untuk memperbesar
+</p>
 {% else %}
-<p>Tidak ada foto</p>
+<p style="color:red; font-weight:500;">
+⚠ KTP belum diupload
+</p>
 {% endif %}
 </div>
 
+<!-- BUTTON -->
 <div class="btn-group">
 <a href="/penyewa/" class="btn btn-back">Kembali</a>
 <a href="/edit-penyewa/{{ penyewa.id }}" class="btn btn-edit">✏ Edit</a>

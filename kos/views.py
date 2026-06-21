@@ -1,8 +1,10 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from reportlab.pdfgen import canvas
+import json
 from django.db.models import Sum
 from django.utils import timezone
+from django.contrib.auth.models import User
 from datetime import date
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -13,7 +15,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet
 from datetime import datetime
 from collections import defaultdict
-from .models import Kamar, Penyewa, Tagihan, Pembayaran, Pengeluaran, Fasilitas, HargaFasilitas
+from .models import Kamar, Penyewa, Tagihan, Pembayaran, Pengeluaran, Fasilitas, HargaFasilitas, RequestPindahKamar
 
 @login_required
 def update_harga_fasilitas(request):
@@ -26,10 +28,7 @@ def update_harga_fasilitas(request):
         harga.rice_cooker = int(request.POST.get("rice_cooker") or 0)
         harga.save()
 
-        # 🔥 penting: redirect ke dashboard
         return redirect('dashboard')
-
-    return redirect('dashboard')
 
 @login_required
 def dashboard(request):
@@ -207,8 +206,6 @@ def detail_penyewa(request, id):
         'penyewa': penyewa
     })
 
-    return render(request, 'kos/detail_penyewa.html', context)
-
 @login_required
 def riwayat_penyewa(request):
 
@@ -285,11 +282,35 @@ def daftar_pembayaran(request):
 
             tagihan = Tagihan.objects.get(id=tagihan_id)
 
+            jumlah_bayar = int(jumlah_bayar)
+
+            # =========================
+            # SIMPAN PEMBAYARAN
+            # =========================
             Pembayaran.objects.create(
                 tagihan=tagihan,
                 tanggal_bayar=timezone.now(),
-                jumlah_bayar=int(jumlah_bayar)
+                jumlah_bayar=jumlah_bayar
             )
+
+            # =========================
+            # REFRESH DATA TAGIHAN
+            # =========================
+            tagihan.refresh_from_db()
+
+            # =========================
+            # UPDATE STATUS
+            # =========================
+            if tagihan.dibayar >= tagihan.total:
+                tagihan.status = "Lunas"
+
+            elif tagihan.dibayar > 0:
+                tagihan.status = "Masih Utang"
+
+            else:
+                tagihan.status = "Belum Bayar"
+
+            tagihan.save()
 
             return redirect('/pembayaran/')
 
@@ -333,6 +354,7 @@ def daftar_pembayaran(request):
     ))
 
     selected_tagihan = None
+
     if grouped_sorted:
         last_bulan = list(grouped_sorted.keys())[-1]
         selected_tagihan = grouped_sorted[last_bulan][0].id
@@ -350,7 +372,6 @@ def daftar_pembayaran(request):
     }
 
     return render(request, 'kos/pembayaran.html', context)
-
 @login_required
 def hapus_pembayaran(request, id):
     pembayaran = Pembayaran.objects.get(id=id)
@@ -466,47 +487,62 @@ def tambah_penyewa(request):
     })
 @login_required
 def pilih_kamar(request):
-    try:
-        penyewa = Penyewa.objects.get(user=request.user)
-    except Penyewa.DoesNotExist:
-        return redirect('dashboard')
+    penyewa = Penyewa.objects.get(user=request.user)
+
+    #  kalau sudah punya kamar → gak boleh pilih lagi
+    if penyewa.kamar:
+        messages.warning(request, "Kamu sudah memiliki kamar!")
+        return redirect('dashboard_penyewa')
 
     kamar_list = Kamar.objects.filter(status='Kosong')
 
     if request.method == 'POST':
         kamar_id = request.POST.get('kamar')
+        kamar = Kamar.objects.get(id=kamar_id)
 
-        if not kamar_id:
-            messages.error(request, "Pilih kamar dulu!")
-            return redirect('pilih_kamar')
+        penyewa.kamar = kamar
+        penyewa.status = "Aktif"
+        penyewa.save()
 
-        kamar_baru = Kamar.objects.filter(id=kamar_id).first()
+        kamar.status = "Terisi"
+        kamar.save()
 
-        if not kamar_baru:
-            messages.error(request, "Kamar tidak ditemukan!")
-            return redirect('pilih_kamar')
+        messages.success(request, "Kamar berhasil dipilih!")
+        return redirect('dashboard_penyewa')
 
-        # lepas kamar lama
+    return render(request, 'kos/pilih_kamar.html', {
+        'kamar_list': kamar_list
+    })
+
+@login_required
+def pindah_kamar(request):
+    penyewa = Penyewa.objects.get(user=request.user)
+
+    kamar_list = Kamar.objects.filter(status='Kosong')
+
+    if request.method == 'POST':
+        kamar_id = request.POST.get('kamar')
+        kamar_baru = Kamar.objects.get(id=kamar_id)
+
+        # kosongkan kamar lama
         if penyewa.kamar:
             penyewa.kamar.status = "Kosong"
             penyewa.kamar.save()
 
-        # assign kamar baru
+        # isi kamar baru
         penyewa.kamar = kamar_baru
         kamar_baru.status = "Terisi"
-
-        # 🔥 PENTING
-        penyewa.status = "Aktif"
 
         penyewa.save()
         kamar_baru.save()
 
+        messages.success(request, "Berhasil pindah kamar!")
         return redirect('dashboard_penyewa')
 
-    return render(request, 'kos/pilih_kamar.html', {
-        'kamar_list': kamar_list,
-        'penyewa': penyewa
+    return render(request, 'kos/pindah_kamar.html', {
+        'kamar_list': kamar_list
     })
+
 # EDIT PENYEWA
 @login_required
 def edit_penyewa(request, id):
@@ -1032,12 +1068,15 @@ def hapus_pengeluaran(request, id):
 
     return redirect('/pengeluaran/')
 
+from datetime import date
+
 def generate_tagihan_otomatis():
     today = date.today()
     bulan = today.strftime("%B")
     tahun = today.year
 
     harga = HargaFasilitas.objects.first()
+
     if not harga:
         harga = HargaFasilitas.objects.create(
             wifi=50000,
@@ -1046,10 +1085,11 @@ def generate_tagihan_otomatis():
             rice_cooker=0
         )
 
-    # 🔥 HANYA PENYEWA AKTIF DAN SUDAH PUNYA KAMAR
+    # Hanya penyewa aktif yang masuk sebelum bulan berjalan
     penyewa_list = Penyewa.objects.filter(
         status="Aktif",
-        kamar__isnull=False
+        kamar__isnull=False,
+        tanggal_masuk__lt=date(today.year, today.month, 1)
     )
 
     for penyewa in penyewa_list:
@@ -1138,7 +1178,7 @@ def dashboard_penyewa(request):
     except Penyewa.DoesNotExist:
         return redirect('dashboard')
 
-    # 🔥 CEK STATUS
+    # 🔥 CEK STATUS AKUN
     if penyewa.status == "Pending":
         messages.warning(request, "Akun Anda belum diaktifkan oleh admin!")
         return render(request, 'kos/dashboard_penyewa.html', {
@@ -1146,12 +1186,21 @@ def dashboard_penyewa(request):
             'pending': True
         })
 
-    # 🔥 AMBIL TAGIHAN
-    tagihan = Tagihan.objects.filter(penyewa=penyewa).order_by('-tahun', '-bulan')
+    # 🔥 DATA TAGIHAN
+    tagihan = Tagihan.objects.filter(
+        penyewa=penyewa
+    ).order_by('-tahun', '-bulan')
 
+    # 🔥 DATA PINDAH KAMAR
+    request_pindah = RequestPindahKamar.objects.filter(
+        penyewa=penyewa
+    ).order_by('-id')
+
+    # 🔥 CONTEXT FINAL
     context = {
         'penyewa': penyewa,
         'tagihan': tagihan,
+        'request_pindah': request_pindah,
         'pending': False
     }
 
@@ -1352,3 +1401,217 @@ def update_harga_fasilitas(request):
         return redirect('dashboard')
 
     return redirect('dashboard')
+
+@login_required
+def profil_penyewa(request):
+    try:
+        penyewa = Penyewa.objects.get(user=request.user)
+    except Penyewa.DoesNotExist:
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        penyewa.no_hp = request.POST.get('no_hp')
+        penyewa.nik = request.POST.get('nik')
+
+        if request.FILES.get('foto_ktp'):
+            penyewa.foto_ktp = request.FILES.get('foto_ktp')
+
+        penyewa.save()
+
+        # 🔥 NOTIFIKASI
+        messages.success(request, "Profil berhasil disimpan!")
+
+        return redirect('profil_penyewa')
+
+    return render(request, 'kos/profil_penyewa.html', {
+        'penyewa': penyewa
+    })
+
+@login_required
+def ajukan_pindah_kamar(request):
+    penyewa = get_object_or_404(Penyewa, user=request.user)
+
+    kamar_list = Kamar.objects.filter(status='Kosong')
+
+    if request.method == 'POST':
+        kamar_id = request.POST.get('kamar')
+
+        if not kamar_id:
+            messages.error(request, "Pilih kamar terlebih dahulu!")
+            return redirect('ajukan_pindah')
+
+        kamar = get_object_or_404(Kamar, id=kamar_id)
+
+        # CEK SUDAH ADA REQUEST PENDING
+        if RequestPindahKamar.objects.filter(
+            penyewa=penyewa,
+            status='Pending'
+        ).exists():
+            messages.error(request, "Kamu masih punya pengajuan yang belum diproses!")
+            return redirect('dashboard_penyewa')
+
+        RequestPindahKamar.objects.create(
+            penyewa=penyewa,
+            kamar_tujuan=kamar,
+            status='Pending'
+        )
+
+        messages.success(request, "Pengajuan pindah kamar berhasil dikirim!")
+        return redirect('dashboard_penyewa')
+
+    return render(request, 'kos/ajukan_pindah.html', {
+        'kamar_list': kamar_list
+    })
+
+
+# =========================
+# APPROVAL ADMIN
+# =========================
+@login_required
+def approval_kamar(request):
+
+    pending = RequestPindahKamar.objects.all()
+    riwayat = RequestPindahKamar.objects.all()
+
+    return render(request, 'kos/approval_kamar.html', {
+        'pending': pending,
+        'riwayat': riwayat
+    })
+
+# =========================
+# SETUJUI PINDAH KAMAR
+# =========================
+@login_required
+def setujui_kamar(request, id):
+    req = get_object_or_404(RequestPindahKamar, id=id)
+
+    penyewa = req.penyewa
+    kamar_baru = req.kamar_tujuan
+
+    # KAMAR LAMA -> KOSONG
+    if penyewa.kamar:
+        kamar_lama = penyewa.kamar
+        kamar_lama.status = "Kosong"
+        kamar_lama.save()
+
+    # KAMAR BARU -> TERISI
+    kamar_baru.status = "Terisi"
+    kamar_baru.save()
+
+    # UPDATE PENYEWA
+    penyewa.kamar = kamar_baru
+    penyewa.save()
+
+    # UPDATE REQUEST
+    req.status = "Disetujui"
+    req.save()
+
+    messages.success(request, "Pindah kamar disetujui!")
+    return redirect('approval_kamar')
+
+
+# =========================
+# TOLAK PINDAH KAMAR
+# =========================
+@login_required
+def tolak_kamar(request, id):
+    req = get_object_or_404(RequestPindahKamar, id=id)
+
+    req.status = "Ditolak"
+    req.save()
+
+    messages.error(request, "Pengajuan ditolak!")
+    return redirect('approval_kamar')
+
+@login_required
+def grafik(request):
+
+    bulan_convert = {
+        "January": "Januari", "February": "Februari", "March": "Maret",
+        "April": "April", "May": "Mei", "June": "Juni",
+        "July": "Juli", "August": "Agustus",
+        "September": "September", "October": "Oktober",
+        "November": "November", "December": "Desember"
+    }
+
+    bulan_map = {
+        1: "Januari", 2: "Februari", 3: "Maret", 4: "April",
+        5: "Mei", 6: "Juni", 7: "Juli", 8: "Agustus",
+        9: "September", 10: "Oktober", 11: "November", 12: "Desember"
+    }
+
+    urutan = [
+        "Januari","Februari","Maret","April","Mei","Juni",
+        "Juli","Agustus","September","Oktober","November","Desember"
+    ]
+
+    pemasukan = Tagihan.objects.filter(status='Lunas') \
+        .values('bulan') \
+        .annotate(total=Sum('total'))
+
+    pengeluaran = Pengeluaran.objects.values('tanggal__month') \
+        .annotate(total=Sum('jumlah'))
+
+    labels = []
+    data_pemasukan = []
+    data_pengeluaran = []
+
+    for bulan in urutan:
+
+        labels.append(bulan)
+
+        total_pemasukan = next(
+            (x['total'] for x in pemasukan
+             if bulan_convert.get(x['bulan'], x['bulan']) == bulan),
+            0
+        )
+
+        total_pengeluaran = next(
+            (x['total'] for x in pengeluaran
+             if bulan_map.get(x['tanggal__month']) == bulan),
+            0
+        )
+
+        data_pemasukan.append(total_pemasukan or 0)
+        data_pengeluaran.append(total_pengeluaran or 0)
+
+    data_saldo = [
+        data_pemasukan[i] - data_pengeluaran[i]
+        for i in range(len(urutan))
+    ]
+
+    context = {
+        'chart_labels': json.dumps(labels),
+        'chart_pemasukan': json.dumps(data_pemasukan),
+        'chart_pengeluaran': json.dumps(data_pengeluaran),
+        'chart_saldo': json.dumps(data_saldo),
+        'total_pemasukan': sum(data_pemasukan),
+        'total_pengeluaran': sum(data_pengeluaran),
+    }
+
+    return render(request, 'kos/grafik.html', context)
+
+@login_required
+def manajemen_fasilitas(request):
+
+    harga = HargaFasilitas.objects.first()
+
+    context = {
+        'harga': harga
+    }
+
+    return render(request, 'kos/manajemen_fasilitas.html', context)
+
+@login_required
+def hapus_riwayat_pindah(request, id):
+    data = get_object_or_404(RequestPindahKamar, id=id)
+
+    data.delete()
+
+    messages.success(request, "Riwayat berhasil dihapus!")
+
+    return redirect('approval_kamar')
+
+@login_required
+def pembayaran_penyewa(request):
+    return render(request, 'kos/pembayaran_penyewa.html')

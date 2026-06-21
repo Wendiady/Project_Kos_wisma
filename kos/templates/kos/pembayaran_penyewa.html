@@ -1,0 +1,122 @@
+{% extends 'kos/base_user.html' %}
+
+{% block title %}Informasi Pembayaran{% endblock %}
+
+{% block topbar_title %}
+Informasi Pembayaran
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="row justify-content-center">
+
+        <!-- BRI -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow border-0 h-100">
+
+                <div class="card-header bg-primary text-white text-center">
+                    <h5 class="mb-0">🏦 Bank BRI</h5>
+                </div>
+
+                <div class="card-body text-center">
+
+                    <h4 class="fw-bold text-primary">
+                        682501019893537
+                    </h4>
+
+                    <p class="text-muted mb-0">
+                        a.n Kartini Yuniasari
+                    </p>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- BNI -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow border-0 h-100">
+
+                <div class="card-header bg-warning text-dark text-center">
+                    <h5 class="mb-0">🏦 Bank BNI</h5>
+                </div>
+
+                <div class="card-body text-center">
+
+                    <h4 class="fw-bold text-warning">
+                        9876543210
+                    </h4>
+
+                    <p class="text-muted mb-0">
+                        a.n Wisma 24 Putra
+                    </p>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- DANA -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow border-0 h-100">
+
+                <div class="card-header bg-info text-white text-center">
+                    <h5 class="mb-0">💙 DANA</h5>
+                </div>
+
+                <div class="card-body text-center">
+
+                    <h4 class="fw-bold text-info">
+                        081234567890
+                    </h4>
+
+                    <p class="text-muted mb-0">
+                        Wisma 24 Putra
+                    </p>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- QRIS -->
+    <div class="row justify-content-center">
+
+        <div class="col-md-5">
+
+            <div class="card shadow border-0">
+
+                <div class="card-header bg-success text-white text-center">
+                    <h5 class="mb-0">📱 Scan QRIS</h5>
+                </div>
+
+                <div class="card-body text-center">
+
+                    <img src="/media/qris.png"
+                         class="img-fluid rounded shadow-sm"
+                         style="max-height:250px;">
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="text-center mt-4">
+
+        <a href="{% url 'dashboard_penyewa' %}"
+           class="btn btn-secondary px-4">
+            ← Kembali
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

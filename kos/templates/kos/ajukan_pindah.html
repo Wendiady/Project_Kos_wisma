@@ -1,0 +1,29 @@
+{% extends 'kos/base_user.html' %}
+
+{% block content %}
+
+<div class="form-box">
+
+<h2>Ajukan Pindah Kamar</h2>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <label>Pilih Kamar</label>
+    <select name="kamar" required>
+        <option value="">-- Pilih Kamar --</option>
+        {% for k in kamar_list %}
+        <option value="{{ k.id }}">{{ k.nomor_kamar }}</option>
+        {% endfor %}
+    </select>
+
+    <div class="btn-group">
+        <button type="submit" class="btn">Ajukan</button>
+        <a href="{% url 'dashboard_penyewa' %}" class="btn">Kembali</a>
+    </div>
+
+</form>
+
+</div>
+
+{% endblock %}

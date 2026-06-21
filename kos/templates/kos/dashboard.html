@@ -1,284 +1,232 @@
 {% extends 'kos/base_admin.html' %}
+{% load humanize %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}
+Dashboard
+{% endblock %}
 
 {% block content %}
 
 <style>
-.chart-box{
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
+
+/* =========================
+JUDUL
+========================= */
+
+.judul-dashboard{
+
+    text-align:center;
+
+    margin:0;
+
+    padding-top:20px;
+
+    padding-bottom:20px;
+
+    font-weight:700;
+
+    color:#1f2d3d;
 }
 
-.cards{
-display:flex;
-gap:15px;
-flex-wrap:wrap;
-justify-content:center;
-margin-bottom:20px;
+/* =========================
+CARD DASHBOARD (COMPACT VERSION)
+========================= */
+
+.dashboard-card{
+    border:none;
+    border-radius:14px;
+    color:white;
+    transition:0.25s ease;
+    overflow:hidden;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
 }
 
-.card{
-padding:20px;
-border-radius:10px;
-color:white;
-width:180px;
-text-align:center;
-font-weight:bold;
-transition:0.3s;
+.dashboard-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 6px 16px rgba(0,0,0,0.12);
 }
 
-.card:hover{
-transform:translateY(-5px) scale(1.05);
+.dashboard-card .card-body{
+    padding:18px;
 }
 
-.blue{background:#3498db;}
-.green{background:#2ecc71;}
-.orange{background:#f39c12;}
-.red{background:#e74c3c;}
-.purple{background:#6c5ce7;}
-
-/* 🔽 SECTION BAWAH */
-.section-bawah{
-margin-top:30px;
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
+.dashboard-card i{
+    font-size:30px;
+    margin-bottom:8px;
 }
 
-/* GRID */
-.grid-fasilitas{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-gap:15px;
-margin-top:15px;
+.dashboard-card h5{
+    font-size:16px;
+    margin-bottom:6px;
+    font-weight:600;
 }
 
-/* ITEM */
-.item{
-display:flex;
-flex-direction:column;
+.dashboard-card h3{
+    font-weight:bold;
+    font-size:24px;
+    margin:0;
 }
 
-.item input{
-padding:8px;
-border-radius:6px;
-border:1px solid #ccc;
+/* =========================
+WARNA CARD
+========================= */
+
+.bg-blue{ background:#3498db; }
+.bg-green{ background:#2ecc71; }
+.bg-orange{ background:#f39c12; }
+.bg-red{ background:#e74c3c; }
+.bg-purple{ background:#6f42c1; }
+.bg-tosca{ background:#20c997; }
+
+/* =========================
+ALERT TELAT (COMPACT)
+========================= */
+
+.alert-telat{
+    background:#fff8e1;
+    border-left:6px solid #ffc107;
+    padding:18px;
+    border-radius:12px;
+    margin-top:25px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.06);
 }
 
-/* BUTTON */
-.btn-simpan{
-margin-top:15px;
-background:#3b6e85;
-color:white;
-padding:10px;
-border:none;
-border-radius:8px;
-cursor:pointer;
+.alert-telat h5{
+    font-size:20px;
+    margin-bottom:10px;
+    color:#856404;
+    font-weight:700;
 }
 
-.btn-simpan:hover{
-background:#2c5568;
+.alert-telat ul{
+    margin-top:8px;
+    padding-left:18px;
 }
+
+.alert-telat li{
+    font-size:15px;
+    margin-bottom:6px;
+}
+
+/* =========================
+RESPONSIVE
+========================= */
+
+@media screen and (max-width:768px){
+
+    .judul-dashboard{
+        font-size:24px;
+    }
+
+    .dashboard-card .card-body{
+        padding:14px;
+    }
+
+    .dashboard-card i{
+        font-size:24px;
+    }
+
+    .dashboard-card h5{
+        font-size:14px;
+    }
+
+    .dashboard-card h3{
+        font-size:20px;
+    }
+
+    .alert-telat h5{
+        font-size:18px;
+    }
+
+    .alert-telat li{
+        font-size:14px;
+    }
+}
+
 </style>
 
-<h2 style="text-align:center;">Selamat Datang di Sistem Kos Wisma 24 Putra</h2>
+<h2 class="judul-dashboard">
+    Selamat Datang di Sistem Kos Wisma 24 Putra
+</h2>
 
-<div class="cards">
+<!-- CARD DASHBOARD -->
+<div class="row g-3">
 
-<!-- STATISTIK -->
-<div class="card blue">
-Pemasukan<br>
-<b>Rp {{ total_pemasukan }}</b>
-</div>
+    <div class="col-lg-4 col-md-6">
+        <div class="card dashboard-card bg-blue">
+            <div class="card-body text-center">
+                <i class="fa fa-money-bill-wave"></i>
+                <h5>Pemasukan</h5>
+                <h3>Rp {{ total_pemasukan|intcomma }}</h3>
+            </div>
+        </div>
+    </div>
 
-<div class="card green">
-Pengeluaran<br>
-<b>Rp {{ total_pengeluaran }}</b>
-</div>
+    <div class="col-lg-4 col-md-6">
+        <div class="card dashboard-card bg-green">
+            <div class="card-body text-center">
+                <i class="fa fa-wallet"></i>
+                <h5>Pengeluaran</h5>
+                <h3>Rp {{ total_pengeluaran|intcomma }}</h3>
+            </div>
+        </div>
+    </div>
 
-<div class="card orange">
-Total Kamar<br>
-<b>{{ total_kamar }}</b>
-</div>
+    <div class="col-lg-4 col-md-6">
+        <div class="card dashboard-card bg-orange">
+            <div class="card-body text-center">
+                <i class="fa fa-door-open"></i>
+                <h5>Total Kamar</h5>
+                <h3>{{ total_kamar }}</h3>
+            </div>
+        </div>
+    </div>
 
-<div class="card red">
-Total Penyewa<br>
-<b>{{ total_penyewa }}</b>
-</div>
+    <div class="col-lg-4 col-md-6">
+        <div class="card dashboard-card bg-red">
+            <div class="card-body text-center">
+                <i class="fa fa-users"></i>
+                <h5>Total Penyewa</h5>
+                <h3>{{ total_penyewa }}</h3>
+            </div>
+        </div>
+    </div>
 
-<div class="card" style="background:#6f42c1;">
-Kamar Terisi<br>
-<b>{{ kamar_terisi }}</b>
-</div>
+    <div class="col-lg-4 col-md-6">
+        <div class="card dashboard-card bg-purple">
+            <div class="card-body text-center">
+                <i class="fa fa-bed"></i>
+                <h5>Kamar Terisi</h5>
+                <h3>{{ kamar_terisi }}</h3>
+            </div>
+        </div>
+    </div>
 
-<div class="card" style="background:#20c997;">
-Kamar Kosong<br>
-<b>{{ kamar_kosong }}</b>
-</div>
+    <div class="col-lg-4 col-md-6">
+        <div class="card dashboard-card bg-tosca">
+            <div class="card-body text-center">
+                <i class="fa fa-house-user"></i>
+                <h5>Kamar Kosong</h5>
+                <h3>{{ kamar_kosong }}</h3>
+            </div>
+        </div>
+    </div>
 
 </div>
 
 <!-- ALERT TELAT -->
 {% if jumlah_telat > 0 %}
-<div style="
-background:#ffe6e6;
-padding:15px;
-border-radius:10px;
-margin:20px auto;
-width:80%;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
-">
+<div class="alert-telat">
 
-<b style="color:red; font-size:16px;">
-⚠ {{ jumlah_telat }} Penyewa Telat Bayar!
-</b>
+    <h5>⚠ {{ jumlah_telat }} Penyewa Telat Bayar</h5>
 
-<ul style="margin-top:10px;">
-{% for t in telat_list %}
-<li>
-{{ t.penyewa.nama }} - jatuh tempo {{ t.jatuh_tempo }}
-</li>
-{% endfor %}
-</ul>
+    <ul>
+        {% for t in telat_list %}
+        <li>{{ t.penyewa.nama }} - jatuh tempo {{ t.jatuh_tempo }}</li>
+        {% endfor %}
+    </ul>
 
 </div>
 {% endif %}
-
-<!-- GRAFIK -->
-<h2 style="text-align:center;">Grafik Keuangan</h2>
-
-<div style="display:flex; gap:20px; flex-wrap:wrap; justify-content:center;">
-
-<div class="chart-box" style="width:60%;">
-<canvas id="chartBulanan"></canvas>
-</div>
-
-<div class="chart-box" style="width:30%;">
-<canvas id="chartDonut"></canvas>
-</div>
-
-</div>
-
-<div class="chart-box" style="margin-top:20px;">
-<canvas id="chartBar"></canvas>
-</div>
-
-<div class="chart-box" style="margin-top:20px;">
-<canvas id="chartSaldo"></canvas>
-</div>
-
-<!-- 🔽 HARGA FASILITAS PINDAH KE BAWAH -->
-<div class="section-bawah">
-<h3>⚙ Manajemen Harga Fasilitas</h3>
-
-<form method="POST" action="{% url 'update_harga_fasilitas' %}">
-{% csrf_token %}
-
-<div class="grid-fasilitas">
-
-<div class="item">
-<label>📶 WiFi</label>
-<input type="number" name="wifi" value="{{ harga.wifi }}">
-</div>
-
-<div class="item">
-<label>❄ AC</label>
-<input type="number" name="ac" value="{{ harga.ac }}">
-</div>
-
-<div class="item">
-<label>🌀 Kipas Angin</label>
-<input type="number" name="kipas_angin" value="{{ harga.kipas_angin }}">
-</div>
-
-<div class="item">
-<label>🍚 Rice Cooker</label>
-<input type="number" name="rice_cooker" value="{{ harga.rice_cooker }}">
-</div>
-
-</div>
-
-<button type="submit" class="btn-simpan">💾 Simpan Perubahan</button>
-
-</form>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-new Chart(document.getElementById('chartBulanan'), {
-type: 'line',
-data: {
-labels: {{ chart_labels|safe }},
-datasets: [
-{
-label: 'Pemasukan',
-data: {{ chart_pemasukan|safe }},
-borderColor: '#3498db',
-backgroundColor: 'rgba(52,152,219,0.2)',
-tension: 0.4,
-fill: true
-},
-{
-label: 'Pengeluaran',
-data: {{ chart_pengeluaran|safe }},
-borderColor: '#e74c3c',
-backgroundColor: 'rgba(231,76,60,0.2)',
-tension: 0.4,
-fill: true
-}
-]
-}
-});
-
-new Chart(document.getElementById('chartDonut'), {
-type: 'doughnut',
-data: {
-labels: ['Pemasukan', 'Pengeluaran'],
-datasets: [{
-data: [{{ total_pemasukan }}, {{ total_pengeluaran }}],
-backgroundColor: ['#3498db', '#e74c3c']
-}]
-}
-});
-
-new Chart(document.getElementById('chartBar'), {
-type: 'bar',
-data: {
-labels: {{ chart_labels|safe }},
-datasets: [
-{
-label: 'Pemasukan',
-data: {{ chart_pemasukan|safe }},
-backgroundColor: '#3498db'
-},
-{
-label: 'Pengeluaran',
-data: {{ chart_pengeluaran|safe }},
-backgroundColor: '#e74c3c'
-}
-]
-}
-});
-
-new Chart(document.getElementById('chartSaldo'), {
-type: 'line',
-data: {
-labels: {{ chart_labels|safe }},
-datasets: [{
-label: 'Saldo',
-data: {{ chart_saldo|safe }},
-borderColor: '#2ecc71',
-backgroundColor: 'rgba(46,204,113,0.2)',
-fill:true,
-tension:0.4
-}]
-}
-});
-</script>
 
 {% endblock %}

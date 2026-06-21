@@ -18,3 +18,4 @@ urlpatterns = [
 
 # AGAR FOTO KTP BISA DITAMPILKAN
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

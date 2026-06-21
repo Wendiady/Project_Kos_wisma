@@ -1,0 +1,166 @@
+{% extends 'kos/base_admin.html' %}
+
+{% block content %}
+
+<style>
+.table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+    margin-bottom:20px;
+}
+
+.table th, .table td{
+    padding:12px;
+    border-bottom:1px solid #ddd;
+    text-align:center;
+}
+
+.table th{
+    background:#2c3e50;
+    color:white;
+}
+
+.btn{
+    padding:6px 12px;
+    border-radius:5px;
+    text-decoration:none;
+    color:white;
+    font-size:13px;
+    margin:2px;
+    display:inline-block;
+}
+
+.btn-yes{
+    background:#2ecc71;
+}
+
+.btn-no{
+    background:#e74c3c;
+}
+
+.btn-danger{
+    background:#c0392b;
+}
+
+.btn:hover{
+    opacity:0.85;
+}
+</style>
+
+<h2>Approval Pindah Kamar</h2>
+
+<hr>
+
+<!-- ===================== PENDING ===================== -->
+<h3>Pengajuan Pending</h3>
+
+<table class="table">
+    <tr>
+        <th>Nama</th>
+        <th>Kamar Sekarang</th>
+        <th>Kamar Tujuan</th>
+        <th>Aksi</th>
+    </tr>
+
+    {% for d in pending %}
+    <tr>
+
+        <td>{{ d.penyewa.nama }}</td>
+
+        <td>
+            {% if d.penyewa.kamar %}
+                {{ d.penyewa.kamar.nomor_kamar }}
+            {% else %}
+                -
+            {% endif %}
+        </td>
+
+        <td>{{ d.kamar_tujuan.nomor_kamar }}</td>
+
+        <td>
+            <a href="{% url 'setujui_kamar' d.id %}" class="btn btn-yes">
+                ✔ Setujui
+            </a>
+
+            <a href="{% url 'tolak_kamar' d.id %}" class="btn btn-no">
+                ✖ Tolak
+            </a>
+        </td>
+
+    </tr>
+
+    {% empty %}
+    <tr>
+        <td colspan="4">Tidak ada pengajuan pending</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<hr>
+
+<!-- ===================== RIWAYAT ===================== -->
+<h3>Riwayat Pengajuan</h3>
+
+<table class="table">
+
+    <tr>
+        <th>Nama</th>
+        <th>Kamar Sekarang</th>
+        <th>Kamar Tujuan</th>
+        <th>Status</th>
+        <th>Aksi</th>
+    </tr>
+
+    {% for d in riwayat %}
+    <tr>
+
+        <td>{{ d.penyewa.nama }}</td>
+
+        <td>
+            {% if d.penyewa.kamar %}
+                {{ d.penyewa.kamar.nomor_kamar }}
+            {% else %}
+                -
+            {% endif %}
+        </td>
+
+        <td>{{ d.kamar_tujuan.nomor_kamar }}</td>
+
+        <td>
+            {% if d.status == "Disetujui" %}
+                <span style="color:green;font-weight:bold;">
+                    Disetujui
+                </span>
+
+            {% elif d.status == "Ditolak" %}
+                <span style="color:red;font-weight:bold;">
+                    Ditolak
+                </span>
+
+            {% else %}
+                <span style="color:orange;font-weight:bold;">
+                    Pending
+                </span>
+            {% endif %}
+        </td>
+
+        <td>
+            <a href="{% url 'hapus_riwayat_pindah' d.id %}"
+               class="btn btn-danger"
+               onclick="return confirm('Yakin ingin menghapus riwayat ini?')">
+                🗑 Hapus
+            </a>
+        </td>
+
+    </tr>
+
+    {% empty %}
+    <tr>
+        <td colspan="5">Belum ada riwayat</td>
+    </tr>
+    {% endfor %}
+
+</table>
+
+{% endblock %}

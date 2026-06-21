@@ -11,7 +11,7 @@ urlpatterns = [
     path('login-penyewa/', views.login_penyewa, name='login_penyewa'),
     path('register-penyewa/', views.register_penyewa, name='register_penyewa'),
     path('logout/', views.logout_view, name='logout'),
-
+    path('manajemen-fasilitas/',views.manajemen_fasilitas, name='manajemen_fasilitas'),
     
     path('dashboard-penyewa/', views.dashboard_penyewa, name='dashboard_penyewa'),
     path('pilih-fasilitas/', views.pilih_fasilitas, name='pilih_fasilitas'),
@@ -19,6 +19,7 @@ urlpatterns = [
     path('pembayaran-penyewa/', views.pembayaran_penyewa, name='pembayaran_penyewa'),
     path('harga-fasilitas/', views.harga_fasilitas, name='harga_fasilitas'),
     path('update-harga/', views.update_harga_fasilitas, name='update_harga_fasilitas'),
+    path('grafik/', views.grafik, name='grafik'),
 
     # =========================
     # KAMAR
@@ -38,6 +39,7 @@ urlpatterns = [
     path('detail-penyewa/<int:id>/', views.detail_penyewa, name='detail_penyewa'),
     path('riwayat-penyewa/', views.riwayat_penyewa, name='riwayat_penyewa'),
     path('keluar-penyewa/<int:id>/', views.keluar_penyewa, name='keluar_penyewa'),
+    path('profil/', views.profil_penyewa, name='profil_penyewa'),
 
     # =========================
     # TAGIHAN
@@ -54,6 +56,7 @@ urlpatterns = [
     # =========================
     path('pembayaran/', views.daftar_pembayaran, name='pembayaran'),
     path('hapus-pembayaran/<int:id>/', views.hapus_pembayaran),
+    path('pembayaran-penyewa/', views.pembayaran_penyewa, name='pembayaran_penyewa'),
 
     # =========================
     # PENGELUARAN
@@ -68,5 +71,11 @@ urlpatterns = [
     # =========================
     path('laporan-keuangan/', views.laporan_keuangan, name='laporan_keuangan'),
     path('download-pdf/', views.download_pdf, name='download_pdf'),
+    path('hapus-riwayat-pindah/<int:id>/',views.hapus_riwayat_pindah, name='hapus_riwayat_pindah'),
+    
 
+    path('ajukan-pindah/', views.ajukan_pindah_kamar, name='ajukan_pindah'),
+    path('approval-kamar/', views.approval_kamar, name='approval_kamar'),
+    path('setujui/<int:id>/', views.setujui_kamar, name='setujui_kamar'),
+    path('tolak/<int:id>/', views.tolak_kamar, name='tolak_kamar'),
 ]

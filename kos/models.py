@@ -37,11 +37,12 @@ class Penyewa(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
 
     nama = models.CharField(max_length=100)
-    no_hp = models.CharField(max_length=15)
-    nik = models.CharField(max_length=16)
+    no_hp = models.CharField(max_length=15, blank=True)
+    nik = models.CharField(max_length=16, blank=True)
 
-    kamar = models.ForeignKey(Kamar, on_delete=models.SET_NULL, null=True)
-    tanggal_masuk = models.DateField()
+    kamar = models.ForeignKey(Kamar, on_delete=models.SET_NULL, null=True, blank=True)
+
+    tanggal_masuk = models.DateField(null=True, blank=True)
     tanggal_keluar = models.DateField(null=True, blank=True)
 
     foto_ktp = models.ImageField(upload_to='ktp/', null=True, blank=True)
@@ -49,12 +50,17 @@ class Penyewa(models.Model):
 
     status = models.CharField(
         max_length=20,
-        choices=[('Aktif', 'Aktif'), ('Keluar', 'Keluar')],
-        default='Aktif'
+        choices=[
+            ('Pending', 'Pending'),
+            ('Aktif', 'Aktif'),
+            ('Keluar', 'Keluar')
+        ],
+        default='Pending'
     )
 
     def __str__(self):
         return self.nama
+
 
 # =========================
 # HARGA FASILITAS (Bisa ubah kapan saja tanpa migrasi)
@@ -180,3 +186,20 @@ class Pengeluaran(models.Model):
     def __str__(self):
         return self.keterangan
 
+class RequestPindahKamar(models.Model):
+    penyewa = models.ForeignKey(Penyewa, on_delete=models.CASCADE)
+    kamar_tujuan = models.ForeignKey(Kamar, on_delete=models.CASCADE)
+    tanggal_request = models.DateTimeField(auto_now_add=True)
+
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('Pending', 'Pending'),
+            ('Disetujui', 'Disetujui'),
+            ('Ditolak', 'Ditolak')
+        ],
+        default='Pending'
+    )
+
+    def __str__(self):
+        return f"{self.penyewa.nama} → {self.kamar_tujuan.nomor_kamar}"

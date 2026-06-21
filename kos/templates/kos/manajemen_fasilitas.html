@@ -1,0 +1,183 @@
+{% extends 'kos/base_admin.html' %}
+
+{% load humanize %}
+
+{% block title %}
+Manajemen Fasilitas
+{% endblock %}
+
+{% block content %}
+
+<style>
+
+.judul{
+    text-align:center;
+    font-weight:bold;
+    margin-bottom:30px;
+    font-size:45px;
+}
+
+.box-fasilitas{
+    background:white;
+    padding:35px;
+    border-radius:20px;
+    box-shadow:0 0 15px rgba(0,0,0,0.08);
+    max-width:1100px;
+    margin:auto;
+}
+
+.grid-fasilitas{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:25px;
+}
+
+.item{
+    display:flex;
+    flex-direction:column;
+}
+
+.item label{
+    font-weight:bold;
+    margin-bottom:10px;
+    font-size:22px;
+    color:#2d3436;
+}
+
+.item input{
+    padding:14px;
+    border-radius:12px;
+    border:1px solid #ccc;
+    font-size:20px;
+    outline:none;
+    transition:0.3s;
+}
+
+.item input:focus{
+    border:1px solid #3b6e85;
+    box-shadow:0 0 8px rgba(59,110,133,0.3);
+}
+
+.harga-text{
+    margin-top:10px;
+    color:#3b6e85;
+    font-weight:bold;
+    font-size:24px;
+}
+
+.btn-simpan{
+    margin-top:35px;
+    background:#3b6e85;
+    color:white;
+    border:none;
+    padding:14px 28px;
+    border-radius:12px;
+    font-size:20px;
+    transition:0.3s;
+}
+
+.btn-simpan:hover{
+    background:#2c5568;
+    transform:scale(1.03);
+}
+
+/* RESPONSIVE HP */
+
+@media screen and (max-width:768px){
+
+    .judul{
+        font-size:30px;
+    }
+
+    .box-fasilitas{
+        padding:20px;
+    }
+
+    .item label{
+        font-size:18px;
+    }
+
+    .item input{
+        font-size:16px;
+    }
+
+    .harga-text{
+        font-size:18px;
+    }
+
+    .btn-simpan{
+        width:100%;
+        font-size:18px;
+    }
+
+}
+
+</style>
+
+<h1 class="judul">
+    ⚙ Manajemen Harga Fasilitas
+</h1>
+
+<div class="box-fasilitas">
+
+<form method="POST" action="{% url 'update_harga_fasilitas' %}">
+    {% csrf_token %}
+
+    <div class="grid-fasilitas">
+
+        <!-- WIFI -->
+        <div class="item">
+            <label>📶 WiFi</label>
+
+            <!-- FIX: tanpa intcomma -->
+            <input type="text" name="wifi" value="{{ harga.wifi }}">
+
+            <div class="harga-text">
+                Rp {{ harga.wifi|intcomma }}
+            </div>
+        </div>
+
+        <!-- AC -->
+        <div class="item">
+            <label>❄ AC</label>
+
+            <input type="text" name="ac" value="{{ harga.ac }}">
+
+            <div class="harga-text">
+                Rp {{ harga.ac|intcomma }}
+            </div>
+        </div>
+
+        <!-- KIPAS -->
+        <div class="item">
+            <label>🌀 Kipas Angin</label>
+
+            <input type="text" name="kipas_angin" value="{{ harga.kipas_angin }}">
+
+            <div class="harga-text">
+                Rp {{ harga.kipas_angin|intcomma }}
+            </div>
+        </div>
+
+        <!-- RICE COOKER -->
+        <div class="item">
+            <label>🍚 Rice Cooker</label>
+
+            <input type="text" name="rice_cooker" value="{{ harga.rice_cooker }}">
+
+            <div class="harga-text">
+                Rp {{ harga.rice_cooker|intcomma }}
+            </div>
+        </div>
+
+    </div>
+
+    <button type="submit" class="btn-simpan">
+        💾 Simpan Perubahan
+    </button>
+
+</form>
+
+</div>
+
+{% endblock %}

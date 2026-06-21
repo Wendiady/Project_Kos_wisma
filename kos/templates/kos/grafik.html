@@ -1,0 +1,132 @@
+{% extends 'kos/base_admin.html' %}
+
+{% block title %}Grafik Omzet{% endblock %}
+
+{% block content %}
+
+<style>
+.chart-box{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+h2{
+    text-align:center;
+    margin-bottom:20px;
+}
+</style>
+
+<h2>Grafik Omzet Kos</h2>
+
+<!-- LINE CHART -->
+<div class="chart-box">
+    <canvas id="chartBulanan"></canvas>
+</div>
+
+<!-- CHART AREA -->
+<div style="display:flex; gap:20px; flex-wrap:wrap; margin-top:20px;">
+
+    <div class="chart-box" style="flex:1;">
+        <canvas id="chartDonut"></canvas>
+    </div>
+
+    <div class="chart-box" style="flex:2;">
+        <canvas id="chartBar"></canvas>
+    </div>
+
+</div>
+
+<!-- SALDO -->
+<div class="chart-box" style="margin-top:20px;">
+    <canvas id="chartSaldo"></canvas>
+</div>
+
+<!-- CHART JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const labels = {{ chart_labels|safe }};
+const pemasukan = {{ chart_pemasukan|safe }};
+const pengeluaran = {{ chart_pengeluaran|safe }};
+const saldo = {{ chart_saldo|safe }};
+
+/* LINE */
+new Chart(document.getElementById('chartBulanan'), {
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: [
+            {
+                label: 'Pemasukan',
+                data: pemasukan,
+                borderColor: '#3498db',
+                fill: true,
+                backgroundColor: 'rgba(52,152,219,0.2)'
+            },
+            {
+                label: 'Pengeluaran',
+                data: pengeluaran,
+                borderColor: '#e74c3c',
+                fill: true,
+                backgroundColor: 'rgba(231,76,60,0.2)'
+            }
+        ]
+    }
+});
+
+/* DONUT */
+new Chart(document.getElementById('chartDonut'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Pemasukan', 'Pengeluaran'],
+        datasets: [{
+            data: [
+                {{ total_pemasukan|default:0 }},
+                {{ total_pengeluaran|default:0 }}
+            ],
+            backgroundColor: ['#3498db', '#e74c3c']
+        }]
+    }
+});
+
+/* BAR */
+new Chart(document.getElementById('chartBar'), {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [
+            {
+                label: 'Pemasukan',
+                data: pemasukan,
+                backgroundColor: '#3498db'
+            },
+            {
+                label: 'Pengeluaran',
+                data: pengeluaran,
+                backgroundColor: '#e74c3c'
+            }
+        ]
+    }
+});
+
+/* SALDO */
+new Chart(document.getElementById('chartSaldo'), {
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Saldo',
+            data: saldo,
+            borderColor: '#2ecc71',
+            fill: true,
+            backgroundColor: 'rgba(46,204,113,0.2)'
+        }]
+    }
+});
+
+</script>
+
+{% endblock %}
