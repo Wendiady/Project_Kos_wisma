@@ -1,29 +1,94 @@
 {% extends 'kos/base_user.html' %}
+{% load humanize %}
 
 {% block content %}
+<style>
+    .container-pindah {
+        max-width: 500px;
+        margin: 40px auto;
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    }
 
-<div class="form-box">
+    .judul { text-align: center; margin-bottom: 25px; }
+    .judul h2 { color: #17324f; font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+    .judul p { color: #666; font-size: 14px; }
 
-<h2>Ajukan Pindah Kamar</h2>
+    .info {
+        background: #eef4fc;
+        border-left: 4px solid #3b6e85;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        color: #555;
+        font-size: 13px;
+        line-height: 1.5;
+    }
 
-<form method="POST">
-    {% csrf_token %}
+    label { font-weight: 600; color: #17324f; margin-bottom: 8px; display: block; font-size: 14px; }
 
-    <label>Pilih Kamar</label>
-    <select name="kamar" required>
-        <option value="">-- Pilih Kamar --</option>
-        {% for k in kamar_list %}
-        <option value="{{ k.id }}">{{ k.nomor_kamar }}</option>
-        {% endfor %}
-    </select>
+    select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        background-color: #f8f9fa;
+    }
 
-    <div class="btn-group">
-        <button type="submit" class="btn">Ajukan</button>
-        <a href="{% url 'dashboard_penyewa' %}" class="btn">Kembali</a>
+    .btn-group { display: flex; gap: 10px; }
+
+    .btn {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        text-align: center;
+        cursor: pointer;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    /* Hijau untuk Ajukan */
+    .btn-ajukan { background: #27ae60; color: white; }
+    .btn-ajukan:hover { background: #219150; }
+
+    /* Merah untuk Kembali */
+    .btn-kembali { background: #e74c3c; color: white; }
+    .btn-kembali:hover { background: #c0392b; }
+</style>
+
+<div class="container-pindah">
+    <div class="judul">
+        <h2>Ajukan Pindah Kamar</h2>
+        <p>Pilih kamar kosong yang ingin Anda tempati.</p>
     </div>
 
-</form>
+    <div class="info">
+        <b>Informasi:</b> Permohonan akan dikirim kepada admin. Jika disetujui, kamar Anda akan diperbarui dan akan dikenakan 
+        <b>biaya administrasi pindah kamar sebesar Rp 50.000</b> pada tagihan bulan berjalan.
+    </div>
 
+    <form method="POST">
+        {% csrf_token %}
+        <label>Pilih Kamar Tujuan</label>
+        <select name="kamar" required>
+            <option value="">-- Pilih Kamar Kosong --</option>
+            {% for k in kamar_list %}
+                <option value="{{ k.id }}">
+                    {{ k.nomor_kamar }} {% if k.harga %}- Rp {{ k.harga|intcomma }}{% endif %}
+                </option>
+            {% endfor %}
+        </select>
+
+        <div class="btn-group">
+            <button type="submit" class="btn btn-ajukan">Ajukan</button>
+            <a href="{% url 'dashboard_penyewa' %}" class="btn btn-kembali">Kembali</a>
+        </div>
+    </form>
 </div>
-
 {% endblock %}

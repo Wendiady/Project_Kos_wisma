@@ -40,6 +40,7 @@ urlpatterns = [
     path('riwayat-penyewa/', views.riwayat_penyewa, name='riwayat_penyewa'),
     path('keluar-penyewa/<int:id>/', views.keluar_penyewa, name='keluar_penyewa'),
     path('profil/', views.profil_penyewa, name='profil_penyewa'),
+    path('upload-bukti/<int:tagihan_id>/', views.upload_bukti_pembayaran, name='upload_bukti_pembayaran'),
 
     # =========================
     # TAGIHAN

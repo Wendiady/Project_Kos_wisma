@@ -16,6 +16,9 @@ from reportlab.lib.styles import getSampleStyleSheet
 from datetime import datetime
 from collections import defaultdict
 from .models import Kamar, Penyewa, Tagihan, Pembayaran, Pengeluaran, Fasilitas, HargaFasilitas, RequestPindahKamar
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, HRFlowable
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import HRFlowable
 
 @login_required
 def update_harga_fasilitas(request):
@@ -33,27 +36,17 @@ def update_harga_fasilitas(request):
 @login_required
 def dashboard(request):
 
-    # =========================
-    # CEK ROLE (ADMIN vs PENYEWA)
-    # =========================
     if hasattr(request.user, 'penyewa'):
         return redirect('dashboard_penyewa')
 
-    # =========================
-    # AUTO TAGIHAN
-    # =========================
     generate_tagihan_otomatis()
 
     today = timezone.now().date()
 
-    # =========================
-    # AMBIL HARGA FASILITAS (BARU)
-    # =========================
     from kos.models import HargaFasilitas
 
     harga = HargaFasilitas.objects.first()
 
-    # kalau belum ada data
     if not harga:
         harga = {
             "wifi": 0,
@@ -61,7 +54,7 @@ def dashboard(request):
             "kipas_angin": 0,
             "rice_cooker": 0
         }
-
+        
     # =========================
     # STATISTIK KOS
     # =========================
@@ -71,8 +64,9 @@ def dashboard(request):
 
     total_penyewa = Penyewa.objects.filter(status='Aktif').count()
 
-    total_pemasukan = Tagihan.objects.filter(status='Lunas').aggregate(
-        total=Sum('total')
+    # 🔥 DIUBAH: Menghilangkan filter 'Lunas' dan menjumlahkan kolom 'dibayar' agar cicilan ikut masuk
+    total_pemasukan = Tagihan.objects.aggregate(
+        total=Sum('dibayar')
     )['total'] or 0
 
     total_pengeluaran = Pengeluaran.objects.aggregate(
@@ -113,7 +107,8 @@ def dashboard(request):
         "Juli","Agustus","September","Oktober","November","Desember"
     ]
 
-    pemasukan = Tagihan.objects.filter(status='Lunas').values('bulan').annotate(total=Sum('total'))
+    # 🔥 DIUBAH: Grafik sekarang membaca jumlah uang yang sudah 'dibayar' (bukan cuma yang lunas)
+    pemasukan = Tagihan.objects.values('bulan').annotate(total=Sum('dibayar'))
     pengeluaran = Pengeluaran.objects.values('tanggal__month').annotate(total=Sum('jumlah'))
 
     semua_bulan = set()
@@ -142,6 +137,10 @@ def dashboard(request):
             (x['total'] for x in pengeluaran if bulan_map[x['tanggal__month']] == bulan),
             0
         )
+
+        # Jika hasil sum bertipe None, ubah jadi 0
+        total_pemasukan_bulan = total_pemasukan_bulan or 0
+        total_pengeluaran_bulan = total_pengeluaran_bulan or 0
 
         data_pemasukan.append(total_pemasukan_bulan)
         data_pengeluaran.append(total_pengeluaran_bulan)
@@ -177,7 +176,6 @@ def dashboard(request):
     }
 
     return render(request, 'kos/dashboard.html', context)
-
 # DATA KAMAR
 @login_required
 def daftar_kamar(request):
@@ -372,6 +370,7 @@ def daftar_pembayaran(request):
     }
 
     return render(request, 'kos/pembayaran.html', context)
+
 @login_required
 def hapus_pembayaran(request, id):
     pembayaran = Pembayaran.objects.get(id=id)
@@ -394,7 +393,7 @@ def tambah_kamar(request):
             status=status
         )
 
-        return redirect('/')
+        return redirect('/kamar/')
 
     return render(request, 'kos/tambah_kamar.html')
 
@@ -696,7 +695,8 @@ def laporan_keuangan(request):
         "October": "Oktober", "November": "November", "December": "Desember"
     }
 
-    tagihan = Tagihan.objects.filter(status='Lunas')
+    # 🔥 DIUBAH: Mengambil semua tagihan yang sudah ada uang masuk (dibayar lebih besar dari 0)
+    tagihan = Tagihan.objects.filter(dibayar__gt=0)
     pengeluaran = Pengeluaran.objects.all()
 
     grouped = defaultdict(lambda: {
@@ -715,7 +715,8 @@ def laporan_keuangan(request):
         key = f"{bulan} {t.tahun}"
 
         grouped[key]["pemasukan"].append(t)
-        grouped[key]["total_pemasukan"] += t.total
+        # 🔥 DIUBAH: Yang dijumlahkan ke total pemasukan laporan adalah nominal 'dibayar' (cicilannya)
+        grouped[key]["total_pemasukan"] += t.dibayar
 
     # =========================
     # PENGELUARAN
@@ -764,151 +765,91 @@ bulan_indo = {
 
 @login_required
 def download_pdf(request):
-
+    # 1. AMBIL FILTER DARI URL
     bulan = request.GET.get('bulan')
     tahun = request.GET.get('tahun')
 
-    if bulan in ["None", ""]:
-        bulan = None
+    if bulan in ["None", ""]: bulan = None
+    if tahun in ["None", ""]: tahun = None
 
-    if tahun in ["None", ""]:
-        tahun = None
-
-    tagihan = Tagihan.objects.filter(status='Lunas')
+    # 2. AMBIL DATA
+    pembayaran = Pembayaran.objects.all()
     pengeluaran = Pengeluaran.objects.all()
 
-    # FILTER
+    # 3. FILTER DATA JIKA ADA
     if bulan and tahun:
         bulan_angka_ke_nama = {
-            "1": "Januari", "2": "Februari", "3": "Maret",
-            "4": "April", "5": "Mei", "6": "Juni",
-            "7": "Juli", "8": "Agustus", "9": "September",
-            "10": "Oktober", "11": "November", "12": "Desember"
+            "1": "Januari", "2": "Februari", "3": "Maret", "4": "April", 
+            "5": "Mei", "6": "Juni", "7": "Juli", "8": "Agustus", 
+            "9": "September", "10": "Oktober", "11": "November", "12": "Desember"
         }
-
         bulan_nama = bulan_angka_ke_nama.get(bulan)
+        pembayaran = pembayaran.filter(tagihan__bulan=bulan_nama, tagihan__tahun=int(tahun))
+        pengeluaran = pengeluaran.filter(tanggal__month=int(bulan), tanggal__year=int(tahun))
 
-        tagihan = tagihan.filter(bulan=bulan_nama, tahun=int(tahun))
-        pengeluaran = pengeluaran.filter(
-            tanggal__month=int(bulan),
-            tanggal__year=int(tahun)
-        )
-
+    # 4. SETUP PDF
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="laporan_kos.pdf"'
+    response['Content-Disposition'] = 'attachment; filename="laporan_keuangan_wisma24.pdf"'
 
-    doc = SimpleDocTemplate(response, pagesize=A4)
+    doc = SimpleDocTemplate(response, pagesize=A4, rightMargin=40, leftMargin=40, topMargin=50, bottomMargin=50)
     elements = []
-    styles = getSampleStyleSheet()
+    HIJAU = colors.HexColor('#059669')
 
-    # =====================
-    # 🟦 JUDUL
-    # =====================
-    elements.append(Paragraph("LAPORAN KEUANGAN KOS WISMA 24", styles['Title']))
-    elements.append(Spacer(1, 10))
+    # 5. JUDUL (Perbaikan Leading & Space)
+    style_header = ParagraphStyle('Header', fontSize=12, alignment=1, spaceAfter=10, leading=15)
+    style_title = ParagraphStyle('Title', fontSize=16, alignment=1, spaceAfter=10, leading=20, fontName='Helvetica-Bold')
+    style_period = ParagraphStyle('Period', fontSize=11, alignment=1, spaceAfter=25, leading=14)
 
-    # 🔥 tanggal indo
-    tanggal = datetime.now().strftime('%d %B %Y')
-    for eng, indo in bulan_indo.items():
-        tanggal = tanggal.replace(eng.capitalize(), indo)
+    elements.append(Paragraph("WISMA 24", style_header))
+    elements.append(Paragraph("Laporan Keuangan", style_title))
+    
+    label_bulan = bulan_angka_ke_nama.get(bulan) if bulan and 'bulan_angka_ke_nama' in locals() else "Seluruh Waktu"
+    teks_periode = f"Periode yang Berakhir pada {label_bulan} {tahun if tahun else ''}"
+    elements.append(Paragraph(teks_periode, style_period))
+    
+    # Garis Pembatas
+    elements.append(HRFlowable(width="100%", thickness=1, color=colors.black, spaceAfter=30))
 
-    elements.append(Paragraph(f"Tanggal Cetak: {tanggal}", styles['Normal']))
-    elements.append(Spacer(1, 20))
+    # 6. STYLE TABEL
+    style_tabel = TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), HIJAU),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('GRID', (0,0), (-1,-1), 1, colors.black),
+        ('FONTSIZE', (0,0), (-1,-1), 9),
+        ('BOTTOMPADDING', (0,0), (-1,0), 6),
+        ('TOPPADDING', (0,0), (-1,0), 6),
+    ])
 
-    # =====================
-    # 📥 PEMASUKAN
-    # =====================
-    elements.append(Paragraph("Detail Pemasukan", styles['Heading2']))
-    elements.append(Spacer(1, 10))
-
-    data_pemasukan = [["Nama", "Bulan", "Total"]]
-    total_pemasukan = 0
-
-    for t in tagihan:
-
-        # 🔥 FIX BULAN PALING KUAT
-        bulan_fix = str(t.bulan).strip().lower()
-        bulan_nama = bulan_indo.get(bulan_fix, t.bulan)
-
+    # 7. TABEL PEMASUKAN
+    elements.append(Paragraph("A. Data Pemasukan", ParagraphStyle('Sub', fontSize=12, fontName='Helvetica-Bold', spaceAfter=10)))
+    data_pemasukan = [["No", "Nama Penyewa", "Tanggal", "Keterangan", "Jumlah"]]
+    for i, p in enumerate(pembayaran, 1):
         data_pemasukan.append([
-            t.penyewa.nama,
-            f"{bulan_nama} {t.tahun}",
-            format_rupiah(t.total)
+            i, 
+            p.tagihan.penyewa.nama, 
+            p.tanggal_bayar.strftime('%d-%m-%Y'), 
+            p.tagihan.status, 
+            format_rupiah(p.jumlah_bayar)
         ])
-
-        total_pemasukan += t.total
-
-    table_pemasukan = Table(data_pemasukan, colWidths=[140, 140, 140])
-    table_pemasukan.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#3b6e85')),
-        ('TEXTCOLOR',(0,0),(-1,0),colors.white),
-        ('ALIGN',(0,0),(-1,-1),'CENTER'),
-        ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
-    ]))
-
-    elements.append(table_pemasukan)
-    elements.append(Spacer(1, 10))
-
-    elements.append(Paragraph(
-        f"Total Pemasukan: {format_rupiah(total_pemasukan)}",
-        styles['Normal']
-    ))
+    
+    tabel = Table(data_pemasukan, colWidths=[30, 130, 80, 80, 80])
+    tabel.setStyle(style_tabel)
+    elements.append(tabel)
     elements.append(Spacer(1, 20))
 
-    # =====================
-    # 📤 PENGELUARAN
-    # =====================
-    elements.append(Paragraph("Detail Pengeluaran", styles['Heading2']))
-    elements.append(Spacer(1, 10))
-
-    data_pengeluaran = [["Tanggal", "Keterangan", "Jumlah"]]
-    total_pengeluaran = 0
-
-    for p in pengeluaran:
-
-        tanggal = p.tanggal.strftime('%d %B %Y')
-
-        # 🔥 convert bulan indo
-        for eng, indo in bulan_indo.items():
-            tanggal = tanggal.replace(eng.capitalize(), indo)
-
-        data_pengeluaran.append([
-            tanggal,
-            p.keterangan,
-            format_rupiah(p.jumlah)
-        ])
-
-        total_pengeluaran += p.jumlah
-
-    table_pengeluaran = Table(data_pengeluaran, colWidths=[120, 220, 100])
-    table_pengeluaran.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#3b6e85')),
-        ('TEXTCOLOR',(0,0),(-1,0),colors.white),
-        ('ALIGN',(0,0),(-1,-1),'CENTER'),
-        ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
-    ]))
-
-    elements.append(table_pengeluaran)
-    elements.append(Spacer(1, 10))
-
-    elements.append(Paragraph(
-        f"Total Pengeluaran: {format_rupiah(total_pengeluaran)}",
-        styles['Normal']
-    ))
-    elements.append(Spacer(1, 20))
-
-    # =====================
-    # 💰 SALDO
-    # =====================
-    saldo = total_pemasukan - total_pengeluaran
-
-    elements.append(Paragraph(
-        f"<b>Saldo Akhir: {format_rupiah(saldo)}</b>",
-        styles['Heading2']
-    ))
-
+    # 8. TABEL PENGELUARAN
+    elements.append(Paragraph("B. Data Pengeluaran", ParagraphStyle('Sub', fontSize=12, fontName='Helvetica-Bold', spaceAfter=10)))
+    data_pengeluaran = [["No", "Tanggal", "Keterangan", "Jumlah"]]
+    for i, p in enumerate(pengeluaran, 1):
+        data_pengeluaran.append([i, p.tanggal.strftime('%d-%m-%Y'), p.keterangan, format_rupiah(p.jumlah)])
+    
+    tabel_p = Table(data_pengeluaran, colWidths=[30, 80, 200, 90])
+    tabel_p.setStyle(style_tabel)
+    elements.append(tabel_p)
+    
     doc.build(elements)
-
     return response
 
 @login_required
@@ -1119,53 +1060,63 @@ def generate_tagihan_otomatis():
 # LOGIN ADMIN
 # =========================
 def login_view(request):
+    # Cek apakah sudah login sebagai user biasa (bukan penyewa)
     if request.user.is_authenticated:
+        if hasattr(request.user, 'penyewa'):
+            return redirect('dashboard_penyewa')
         return redirect('dashboard')
 
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-
         user = authenticate(request, username=username, password=password)
 
         if user:
-            login(request, user)
-            return redirect('dashboard')
+            # Pastikan admin tidak bisa login di sini jika dia sebenarnya penyewa
+            if not hasattr(user, 'penyewa'):
+                login(request, user)
+                return redirect('dashboard')
+            else:
+                messages.error(request, 'Gunakan halaman login penyewa!')
         else:
             messages.error(request, 'Username atau password salah!')
 
     return render(request, 'kos/login.html')
 
 
-# =========================
-# LOGIN PENYEWA
-# =========================
 def login_penyewa(request):
+    # Cek apakah sudah login
+    if request.user.is_authenticated:
+        if hasattr(request.user, 'penyewa'):
+            return redirect('dashboard_penyewa')
+        return redirect('dashboard')
+
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-
         user = authenticate(request, username=username, password=password)
 
         if user:
-            try:
-                Penyewa.objects.get(user=user)
+            if hasattr(user, 'penyewa'):
                 login(request, user)
-                return redirect('dashboard_penyewa')  
-            except Penyewa.DoesNotExist:
+                return redirect('dashboard_penyewa')
+            else:
                 messages.error(request, 'Akun ini bukan penyewa!')
         else:
             messages.error(request, 'Username atau password salah!')
 
     return render(request, 'kos/login_penyewa.html')
 
-# =========================
-# LOGOUT
-# =========================
+
 def logout_view(request):
+    # Kita cek dulu tipe user-nya sebelum logout untuk menentukan arah redirect
+    is_penyewa = hasattr(request.user, 'penyewa')
     logout(request)
     messages.success(request, 'Anda berhasil logout!')
-    return redirect('dashboard')
+    
+    if is_penyewa:
+        return redirect('login_penyewa')
+    return redirect('login') # Ganti 'login' dengan nama url login admin Anda
 
 
 # =========================
@@ -1366,42 +1317,37 @@ def update_harga_fasilitas(request):
         harga.rice_cooker = int(request.POST.get("rice_cooker") or 0)
         harga.save()
 
-        # 🔥 AUTO UPDATE SEMUA TAGIHAN
+        # AUTO UPDATE SEMUA TAGIHAN
         for tagihan in Tagihan.objects.all():
             penyewa = tagihan.penyewa
-
             wifi = ac = kipas = rice = 0
 
             for f in penyewa.fasilitas.all():
                 nama = f.nama.lower()
-
-                if "wifi" in nama:
-                    wifi = harga.wifi
-                elif "ac" in nama:
-                    ac = harga.ac
-                elif "kipas" in nama:
-                    kipas = harga.kipas_angin
-                elif "rice" in nama:
-                    rice = harga.rice_cooker
+                if "wifi" in nama: wifi = harga.wifi
+                elif "ac" in nama: ac = harga.ac
+                elif "kipas" in nama: kipas = harga.kipas_angin
+                elif "rice" in nama: rice = harga.rice_cooker
 
             tagihan.wifi = wifi
             tagihan.ac = ac
             tagihan.kipas_angin = kipas
             tagihan.rice_cooker = rice
-
             tagihan.total = (
                 tagihan.biaya_kamar +
                 tagihan.listrik +
                 tagihan.air +
                 wifi + ac + kipas + rice
             )
-
             tagihan.save()
 
-        return redirect('dashboard')
+        # Tambahkan notifikasi sukses
+        messages.success(request, 'Harga fasilitas berhasil diperbarui!')
+        
+        # Arahkan kembali ke manajemen fasilitas, bukan dashboard
+        return redirect('manajemen_fasilitas')
 
-    return redirect('dashboard')
-
+    return redirect('manajemen_fasilitas')
 @login_required
 def profil_penyewa(request):
     try:
@@ -1506,9 +1452,19 @@ def setujui_kamar(request, id):
     req.status = "Disetujui"
     req.save()
 
-    messages.success(request, "Pindah kamar disetujui!")
-    return redirect('approval_kamar')
+    # --- TAMBAHAN: OTOMATIS TAMBAH BIAYA PINDAH KE TAGIHAN AKTIF ---
+    tagihan_aktif = Tagihan.objects.filter(
+        penyewa=penyewa, 
+        status__in=['Belum Bayar', 'Masih Utang']
+    ).first()
+    
+    if tagihan_aktif:
+        tagihan_aktif.biaya_pindah = 50000
+        tagihan_aktif.save()  # Ini akan memicu fungsi save() di model Tagihan untuk menghitung ulang total, sisa, dan status secara otomatis!
+    # -------------------------------------------------------------
 
+    messages.success(request, "Pindah kamar disetujui dan biaya administrasi telah ditambahkan ke tagihan!")
+    return redirect('approval_kamar')
 
 # =========================
 # TOLAK PINDAH KAMAR
@@ -1615,3 +1571,21 @@ def hapus_riwayat_pindah(request, id):
 @login_required
 def pembayaran_penyewa(request):
     return render(request, 'kos/pembayaran_penyewa.html')
+
+@login_required
+def upload_bukti_pembayaran(request, tagihan_id):
+    tagihan = get_object_or_404(Tagihan, id=tagihan_id)
+    
+    if request.method == 'POST':
+        jumlah_bayar = request.POST.get('jumlah_bayar')
+        bukti_bayar = request.FILES.get('bukti_bayar')
+        
+        if jumlah_bayar and bukti_bayar:
+            # Otomatis membuat data pembayaran baru yang langsung masuk ke admin
+            Pembayaran.objects.create(
+                tagihan=tagihan,
+                jumlah_bayar=int(jumlah_bayar),
+                bukti_bayar=bukti_bayar
+            )
+            
+        return redirect('tagihan_penyewa')

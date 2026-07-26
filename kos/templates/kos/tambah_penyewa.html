@@ -1,151 +1,133 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Tambah Penyewa</title>
+    <title>Tambah Penyewa</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            overflow: hidden; /* Memastikan tidak ada scroll */
+        }
 
-<style>
-body{
-    font-family:Arial;
-    background:#f5f5f5;
-    padding:40px;
-}
+        .card {
+            background: white;
+            padding: 15px 25px;
+            width: 90%;
+            max-width: 450px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
 
-.card{
-    background:white;
-    padding:30px;
-    max-width:500px;
-    margin:auto;
-    border-radius:10px;
-    box-shadow:0 4px 15px rgba(0,0,0,0.1);
-}
+        h2 { margin: 0 0 10px 0; font-size: 18px; text-align: center; color: #1e293b; }
 
-h2{
-    margin-bottom:20px;
-}
+        label { display: block; margin-bottom: 2px; font-weight: 600; font-size: 12px; color: #475569; }
 
-input, select{
-    width:100%;
-    padding:10px;
-    margin-bottom:15px;
-    border:1px solid #ccc;
-    border-radius:6px;
-}
+        input[type="text"], input[type="password"], input[type="file"], input[type="date"], select {
+            width: 100%;
+            padding: 6px;
+            margin-bottom: 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 13px;
+        }
 
-button{
-    padding:10px 15px;
-    background:#3b6e85;
-    color:white;
-    border:none;
-    cursor:pointer;
-    border-radius:6px;
-    width:100%;
-}
+        .fasilitas { margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 5px; }
+        .fasilitas label {
+            background: #f1f5f9;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+            font-size: 11px;
+            transition: 0.2s;
+        }
 
-button:hover{
-    background:#2c5f73;
-}
-
-.info{
-    color:red;
-    margin-bottom:10px;
-    font-size:14px;
-}
-
-/* 🔥 fasilitas biar rapi */
-.fasilitas{
-    margin-bottom:20px;
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-}
-
-.fasilitas label{
-    background:#f1f1f1;
-    padding:8px 12px;
-    border-radius:20px;
-    cursor:pointer;
-    border:1px solid #ddd;
-    transition:0.2s;
-}
-
-.fasilitas label:hover{
-    background:#e0eef5;
-}
-
-.fasilitas input{
-    margin-right:5px;
-}
-</style>
-
+        .btn-group { display: flex; gap: 8px; margin-top: 5px; }
+        
+        button, .btn-back {
+            padding: 8px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            flex: 1;
+        }
+        
+        button { background: #10b981; color: white; }
+        .btn-back { background: #94a3b8; color: white; }
+        .info { color: #e11d48; margin-bottom: 8px; font-size: 12px; font-weight: bold; }
+    </style>
 </head>
 
 <body>
 
 <div class="card">
+    <h2>Tambah Penyewa</h2>
 
-<h2>Tambah Penyewa</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
 
-<form method="POST" enctype="multipart/form-data">
-{% csrf_token %}
+        <label>Nama Penyewa</label>
+        <input type="text" name="nama" required>
 
-<label>Nama Penyewa</label>
-<input type="text" name="nama" required>
+        <label>No HP</label>
+        <input type="text" name="no_hp" required>
 
-<label>No HP</label>
-<input type="text" name="no_hp" required>
+        <label>NIK</label>
+        <input type="text" name="nik" maxlength="16" required>
 
-<label>NIK</label>
-<input type="text" name="nik" maxlength="16" required>
+        <label>Upload Foto KTP</label>
+        <input type="file" name="foto_ktp" accept="image/*" required>
 
-<label>Upload Foto KTP</label>
-<input type="file" name="foto_ktp" accept="image/*" required>
+        <label>Username & Password</label>
+        <div style="display:flex; gap:5px;">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+        </div>
 
-<label>Username</label>
-<input type="text" name="username" placeholder="Masukkan username" required>
+        <label>Fasilitas</label>
+        <div class="fasilitas">
+            {% for f in fasilitas %}
+            <label>
+                <input type="checkbox" name="fasilitas" value="{{ f.id }}">
+                {{ f.nama }}
+            </label>
+            {% endfor %}
+        </div>
 
-<label>Password</label>
-<input type="password" name="password" placeholder="Masukkan password" required>
+        <label>Kamar & Tanggal Masuk</label>
+        {% if kamar %}
+            <div style="display:flex; gap:5px;">
+                <select name="kamar" required>
+                    {% for k in kamar %}
+                        <option value="{{k.id}}">Kamar {{k.nomor_kamar}}</option>
+                    {% endfor %}
+                </select>
+                <input type="date" name="tanggal_masuk" required>
+            </div>
+        {% else %}
+            <div class="info">Tidak ada kamar kosong.</div>
+            <select disabled><option>Tidak ada kamar</option></select>
+        {% endif %}
 
-<!-- 🔥 FASILITAS -->
-<label>Fasilitas</label>
-<div class="fasilitas">
-{% for f in fasilitas %}
-<label>
-    <input type="checkbox" name="fasilitas" value="{{ f.id }}">
-    {{ f.nama }}
-</label>
-{% endfor %}
-</div>
-
-<label>Kamar</label>
-{% if kamar %}
-<select name="kamar" required>
-{% for k in kamar %}
-<option value="{{k.id}}">
-Kamar {{k.nomor_kamar}}
-</option>
-{% endfor %}
-</select>
-{% else %}
-<div class="info">
-Tidak ada kamar kosong.
-</div>
-<select disabled>
-<option>Tidak ada kamar</option>
-</select>
-{% endif %}
-
-<label>Tanggal Masuk</label>
-<input type="date" name="tanggal_masuk" required>
-
-{% if kamar %}
-<button type="submit">Simpan</button>
-{% else %}
-<button disabled>Tidak Bisa Simpan</button>
-{% endif %}
-
-</form>
-
+        <div class="btn-group">
+            <a href="/penyewa/" class="btn-back">Kembali</a>
+            {% if kamar %}
+                <button type="submit">Simpan Data</button>
+            {% else %}
+                <button type="button" disabled>Tidak Bisa Simpan</button>
+            {% endif %}
+        </div>
+    </form>
 </div>
 
 </body>

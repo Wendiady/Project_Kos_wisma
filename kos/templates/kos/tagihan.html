@@ -1,113 +1,366 @@
 {% load humanize %}
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Data Tagihan</title>
 
 <style>
 
-body{
-font-family:Arial;
-background:#f5f5f5;
-padding:40px;
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
 }
 
-h2{
-margin-bottom:20px;
+body{
+font-family:Arial,sans-serif;
+background:#f4f6f9;
+padding:35px;
+color:#333;
+}
+
+/* =========================
+HEADER
+========================= */
+
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+gap:15px;
+margin-bottom:25px;
+}
+
+.header h2{
+font-size:30px;
+color:#3b6e85;
+font-weight:bold;
 }
 
 .top-menu{
-margin-bottom:20px;
-}
-
-.btn{
-display:inline-block;
-padding:8px 15px;
-background:#3b6e85;
-color:white;
-text-decoration:none;
-border-radius:5px;
-margin-right:10px;
-}
-
-.btn:hover{
-background:#2c5f73;
-}
-
-/* CARD BULAN */
-.bulan-box{
-margin-top:30px;
-background:white;
-padding:15px;
-border-radius:10px;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
-}
-
-/* HEADER BULAN */
-.bulan-title{
-background:#3b6e85;
-color:white;
-padding:10px;
-border-radius:5px;
-margin-bottom:10px;
-font-weight:bold;
-}
-
-/* TABLE */
-table{
-border-collapse:collapse;
-width:100%;
-}
-
-th,td{
-border:1px solid #ddd;
-padding:10px;
-text-align:center;
-}
-
-th{
-background:#3b6e85;
-color:white;
-}
-
-/* STATUS */
-.status-lunas{
-background:#4CAF50;
-color:white;
-padding:4px 10px;
-border-radius:5px;
-}
-
-.status-belum{
-background:#f44336;
-color:white;
-padding:4px 10px;
-border-radius:5px;
-}
-
-.status-utang{
-background:#ff9800;
-color:white;
-padding:4px 10px;
-border-radius:5px;
-}
-
-/* NAMA */
-.nama-penyewa a{
-text-decoration:none;
-color:#2c5f73;
-font-weight:bold;
-}
-
-/* AKSI */
-.aksi{
 display:flex;
-justify-content:center;
 gap:10px;
 }
 
-.edit{ color:#ff9800; }
-.hapus{ color:#f44336; }
+/* =========================
+BUTTON
+========================= */
+
+.btn{
+display:inline-block;
+padding:10px 18px;
+border-radius:8px;
+text-decoration:none;
+font-weight:bold;
+transition:.3s;
+}
+
+.btn-dashboard{
+background:#6c757d;
+color:white;
+}
+
+.btn-dashboard:hover{
+background:#5a6268;
+color:white;
+}
+
+.btn-tambah{
+background:#3b6e85;
+color:white;
+}
+
+.btn-tambah:hover{
+background:#2c5f73;
+color:white;
+}
+
+/* =========================
+CARD BULAN
+========================= */
+
+.bulan-box{
+
+background:white;
+
+padding:20px;
+
+border-radius:15px;
+
+margin-bottom:25px;
+
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+
+}
+
+/* =========================
+JUDUL BULAN
+========================= */
+
+.bulan-title{
+
+background:#3b6e85;
+
+color:white;
+
+padding:12px 18px;
+
+border-radius:8px;
+
+font-size:18px;
+
+font-weight:bold;
+
+margin-bottom:15px;
+
+}
+
+/* =========================
+TABLE
+========================= */
+
+.table-responsive{
+
+overflow-x:auto;
+
+}
+
+table{
+
+width:100%;
+
+border-collapse:collapse;
+
+}
+
+thead{
+
+background:#3b6e85;
+
+color:white;
+
+}
+
+th{
+
+padding:14px;
+
+font-size:15px;
+
+}
+
+td{
+
+padding:14px;
+
+text-align:center;
+
+border-bottom:1px solid #ddd;
+
+}
+
+tbody tr{
+
+transition:.3s;
+
+}
+
+tbody tr:hover{
+
+background:#eef7fb;
+
+}
+
+/* =========================
+NAMA PENYEWA
+========================= */
+
+.nama-penyewa a{
+
+text-decoration:none;
+
+color:#3b6e85;
+
+font-weight:bold;
+
+}
+
+.nama-penyewa a:hover{
+
+color:#2c5f73;
+
+}
+
+/* =========================
+STATUS
+========================= */
+
+.status-lunas{
+
+background:#28a745;
+
+color:white;
+
+padding:6px 14px;
+
+border-radius:20px;
+
+font-size:13px;
+
+font-weight:bold;
+
+}
+
+.status-belum{
+
+background:#dc3545;
+
+color:white;
+
+padding:6px 14px;
+
+border-radius:20px;
+
+font-size:13px;
+
+font-weight:bold;
+
+}
+
+.status-utang{
+
+background:#ff9800;
+
+color:white;
+
+padding:6px 14px;
+
+border-radius:20px;
+
+font-size:13px;
+
+font-weight:bold;
+
+}
+
+/* =========================
+AKSI
+========================= */
+
+.aksi{
+
+display:flex;
+
+justify-content:center;
+
+gap:8px;
+
+}
+
+.btn-edit{
+
+background:#ffc107;
+
+color:black;
+
+padding:8px 15px;
+
+border-radius:8px;
+
+text-decoration:none;
+
+font-weight:bold;
+
+transition:.3s;
+
+border:1px solid #d9a406;
+
+}
+
+.btn-edit:hover{
+
+background:#e0a800;
+
+color:black;
+
+}
+
+.btn-hapus{
+
+background:#dc3545;
+
+color:white;
+
+padding:8px 15px;
+
+border-radius:8px;
+
+text-decoration:none;
+
+font-weight:bold;
+
+transition:.3s;
+
+border:1px solid #bb2d3b;
+
+}
+
+.btn-hapus:hover{
+
+background:#bb2d3b;
+
+color:white;
+
+}
+
+/* =========================
+RESPONSIVE
+========================= */
+
+@media(max-width:768px){
+
+.header{
+
+flex-direction:column;
+
+align-items:flex-start;
+
+}
+
+.header h2{
+
+font-size:24px;
+
+}
+
+.top-menu{
+
+width:100%;
+
+flex-wrap:wrap;
+
+}
+
+.btn{
+
+width:100%;
+
+text-align:center;
+
+}
+
+table{
+
+min-width:800px;
+
+}
+
+}
 
 </style>
 
@@ -115,67 +368,116 @@ gap:10px;
 
 <body>
 
+<div class="header">
+
 <h2>Data Tagihan Kos Wisma 24</h2>
 
 <div class="top-menu">
-<a href="/" class="btn">Kembali</a>
-<a href="/tambah-tagihan/" class="btn">+ Tambah Tagihan</a>
+
+<a href="/" class="btn btn-dashboard">
+  Kembali
+</a>
+
+<a href="/tambah-tagihan/" class="btn btn-tambah">
++ Tambah Tagihan
+</a>
+
 </div>
 
-<!-- LOOP PER BULAN -->
+</div>
+
 {% for bulan, items in grouped_tagihan.items %}
 
 <div class="bulan-box">
 
 <div class="bulan-title">
+
 📅 {{ bulan }}
+
 </div>
+
+<div class="table-responsive">
 
 <table>
 
+<thead>
+
 <tr>
-<th>Nama</th>
-<th>Total</th>
+
+<th>Nama Penyewa</th>
+<th>Total Tagihan</th>
 <th>Dibayar</th>
 <th>Sisa</th>
 <th>Status</th>
 <th>Aksi</th>
+
 </tr>
 
+</thead>
+
+<tbody>
+
 {% for t in items %}
+
 <tr>
 
 <td class="nama-penyewa">
-<a href="/tagihan/{{ t.id }}/">👁 {{ t.penyewa.nama }}</a>
+<a href="/tagihan/{{ t.id }}/">
+👁 {{ t.penyewa.nama }}
+</a>
 </td>
 
-<td>Rp {{ t.total|intcomma }}</td>
+<td><strong>Rp {{ t.total|intcomma }}</strong></td>
+
 <td>Rp {{ t.dibayar|intcomma }}</td>
+
 <td>Rp {{ t.sisa|intcomma }}</td>
 
 <td>
+
 {% if t.status == "Lunas" %}
+
 <span class="status-lunas">Lunas</span>
 
 {% elif t.status == "Masih Utang" %}
+
 <span class="status-utang">Masih Utang</span>
 
 {% else %}
+
 <span class="status-belum">Belum Bayar</span>
+
 {% endif %}
+
 </td>
 
 <td>
+
 <div class="aksi">
-<a href="/edit-tagihan/{{t.id}}" class="edit">✏</a>
-<a href="/hapus-tagihan/{{t.id}}" class="hapus">🗑</a>
+
+<a href="/edit-tagihan/{{ t.id }}/" class="btn-edit">
+Edit
+</a>
+
+<a href="/hapus-tagihan/{{ t.id }}/"
+class="btn-hapus"
+onclick="return confirm('Apakah Anda yakin ingin menghapus tagihan milik {{ t.penyewa.nama }}?');">
+Hapus
+</a>
+
 </div>
+
 </td>
 
 </tr>
+
 {% endfor %}
 
+</tbody>
+
 </table>
+
+</div>
 
 </div>
 

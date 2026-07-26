@@ -3,164 +3,453 @@
 {% block content %}
 
 <style>
+
+body{
+    background:#f4f6f9;
+}
+
+/* ===========================
+HALAMAN
+=========================== */
+
+.approval-page{
+    max-width:1100px;
+    margin:10px auto;
+    padding:0 10px;
+}
+
+/* ===========================
+HEADER
+=========================== */
+
+.page-header{
+    margin-bottom:18px;
+}
+
+.page-header h2{
+    font-size:28px;
+    color:#17324f;
+    font-weight:700;
+    margin-bottom:3px;
+}
+
+.page-header p{
+    color:#666;
+    font-size:14px;
+    margin:0;
+}
+
+/* ===========================
+CARD
+=========================== */
+
+.card-box{
+    background:#fff;
+    border-radius:15px;
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+    padding:18px;
+    margin-bottom:18px;
+}
+
+.card-title{
+    font-size:21px;
+    font-weight:700;
+    color:#17324f;
+    margin-bottom:12px;
+}
+
+/* ===========================
+TABLE
+=========================== */
+
+.table-responsive{
+    overflow-x:auto;
+}
+
 .table{
     width:100%;
     border-collapse:collapse;
-    background:white;
-    margin-bottom:20px;
+    font-size:15px;
 }
 
-.table th, .table td{
-    padding:12px;
-    border-bottom:1px solid #ddd;
-    text-align:center;
+.table thead{
+    background:#17324f;
+    color:white;
 }
 
 .table th{
-    background:#2c3e50;
-    color:white;
+    padding:10px;
+    text-align:center;
+    font-size:14px;
 }
+
+.table td{
+    padding:10px;
+    text-align:center;
+    vertical-align:middle;
+    border-bottom:1px solid #ececec;
+}
+
+.table tbody tr:hover{
+    background:#f8fbff;
+}
+
+/* ===========================
+TEXT
+=========================== */
+
+.nama{
+    font-weight:600;
+}
+
+/* ===========================
+STATUS
+=========================== */
+
+.status{
+    display:inline-block;
+    padding:5px 12px;
+    border-radius:20px;
+    color:white;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.pending{
+    background:#f39c12;
+}
+
+.disetujui{
+    background:#28a745;
+}
+
+.ditolak{
+    background:#dc3545;
+}
+
+/* ===========================
+BUTTON
+=========================== */
 
 .btn{
-    padding:6px 12px;
-    border-radius:5px;
-    text-decoration:none;
-    color:white;
-    font-size:13px;
-    margin:2px;
     display:inline-block;
-}
-
-.btn-yes{
-    background:#2ecc71;
-}
-
-.btn-no{
-    background:#e74c3c;
-}
-
-.btn-danger{
-    background:#c0392b;
+    padding:6px 12px;
+    border-radius:8px;
+    color:white;
+    text-decoration:none;
+    font-size:13px;
+    font-weight:600;
+    transition:.3s;
+    margin:2px;
 }
 
 .btn:hover{
-    opacity:0.85;
+    transform:translateY(-2px);
 }
+
+.btn-yes{
+    background:#28a745;
+}
+
+.btn-yes:hover{
+    background:#208637;
+}
+
+.btn-no{
+    background:#dc3545;
+}
+
+.btn-no:hover{
+    background:#bb2d3b;
+}
+
+.btn-danger{
+    background:#6c757d;
+}
+
+.btn-danger:hover{
+    background:#545b62;
+}
+
+/* ===========================
+AKSI
+=========================== */
+
+.aksi{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:6px;
+    flex-wrap:wrap;
+}
+
+/* ===========================
+KOSONG
+=========================== */
+
+.kosong{
+    text-align:center;
+    color:#888;
+    padding:20px;
+}
+
+/* ===========================
+RESPONSIVE
+=========================== */
+
+@media(max-width:768px){
+
+    .approval-page{
+        padding:0;
+    }
+
+    .page-header h2{
+        font-size:24px;
+    }
+
+    .card-title{
+        font-size:20px;
+    }
+
+    .table{
+        min-width:700px;
+    }
+
+}
+
 </style>
 
-<h2>Approval Pindah Kamar</h2>
+<div class="approval-page">
 
-<hr>
+    <div class="page-header">
 
-<!-- ===================== PENDING ===================== -->
-<h3>Pengajuan Pending</h3>
+        <h2>Approval Pindah Kamar</h2>
 
-<table class="table">
-    <tr>
-        <th>Nama</th>
-        <th>Kamar Sekarang</th>
-        <th>Kamar Tujuan</th>
-        <th>Aksi</th>
-    </tr>
+        <p>
+            Kelola seluruh permintaan pindah kamar dari penyewa.
+        </p>
 
-    {% for d in pending %}
-    <tr>
+    </div>
 
-        <td>{{ d.penyewa.nama }}</td>
+    <div class="card-box">
 
-        <td>
-            {% if d.penyewa.kamar %}
-                {{ d.penyewa.kamar.nomor_kamar }}
-            {% else %}
-                -
-            {% endif %}
-        </td>
+    <div class="card-title d-flex justify-content-between align-items-center">
 
-        <td>{{ d.kamar_tujuan.nomor_kamar }}</td>
+        <div>
+            <i class="fa fa-clock" style="color:#f39c12;"></i>
+            Pengajuan Pending
+        </div>
 
-        <td>
-            <a href="{% url 'setujui_kamar' d.id %}" class="btn btn-yes">
-                ✔ Setujui
-            </a>
+        <span class="badge bg-warning text-dark fs-6">
+            {{ pending|length }}
+        </span>
 
-            <a href="{% url 'tolak_kamar' d.id %}" class="btn btn-no">
-                ✖ Tolak
-            </a>
-        </td>
+    </div>
 
-    </tr>
+    <div class="table-responsive">
 
-    {% empty %}
-    <tr>
-        <td colspan="4">Tidak ada pengajuan pending</td>
-    </tr>
-    {% endfor %}
-</table>
+        <table class="table">
 
-<hr>
+            <thead>
 
-<!-- ===================== RIWAYAT ===================== -->
-<h3>Riwayat Pengajuan</h3>
+                <tr>
 
-<table class="table">
+                    <th width="60">No</th>
 
-    <tr>
-        <th>Nama</th>
-        <th>Kamar Sekarang</th>
-        <th>Kamar Tujuan</th>
-        <th>Status</th>
-        <th>Aksi</th>
-    </tr>
+                    <th>Nama Penyewa</th>
 
-    {% for d in riwayat %}
-    <tr>
+                    <th>Kamar Saat Ini</th>
 
-        <td>{{ d.penyewa.nama }}</td>
+                    <th>Kamar Tujuan</th>
 
-        <td>
-            {% if d.penyewa.kamar %}
-                {{ d.penyewa.kamar.nomor_kamar }}
-            {% else %}
-                -
-            {% endif %}
-        </td>
+                    <th width="220">Aksi</th>
 
-        <td>{{ d.kamar_tujuan.nomor_kamar }}</td>
+                </tr>
 
-        <td>
-            {% if d.status == "Disetujui" %}
-                <span style="color:green;font-weight:bold;">
-                    Disetujui
-                </span>
+            </thead>
 
-            {% elif d.status == "Ditolak" %}
-                <span style="color:red;font-weight:bold;">
-                    Ditolak
-                </span>
+            <tbody>
 
-            {% else %}
-                <span style="color:orange;font-weight:bold;">
-                    Pending
-                </span>
-            {% endif %}
-        </td>
+            {% for d in pending %}
 
-        <td>
-            <a href="{% url 'hapus_riwayat_pindah' d.id %}"
-               class="btn btn-danger"
-               onclick="return confirm('Yakin ingin menghapus riwayat ini?')">
-                🗑 Hapus
-            </a>
-        </td>
+            <tr>
 
-    </tr>
+                <td>{{ forloop.counter }}</td>
 
-    {% empty %}
-    <tr>
-        <td colspan="5">Belum ada riwayat</td>
-    </tr>
-    {% endfor %}
+                <td class="nama">{{ d.penyewa.nama }}</td>
 
-</table>
+                <td>
+                    {% if d.penyewa.kamar %}
+                        {{ d.penyewa.kamar.nomor_kamar }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+
+                <td>{{ d.kamar_tujuan.nomor_kamar }}</td>
+
+                <td>
+
+                    <div class="aksi">
+
+                        <a href="{% url 'setujui_kamar' d.id %}" class="btn btn-yes">
+                            <i class="fa fa-check"></i> Setujui
+                        </a>
+
+                        <a href="{% url 'tolak_kamar' d.id %}" class="btn btn-no">
+                            <i class="fa fa-times"></i> Tolak
+                        </a>
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+
+                <td colspan="5" class="kosong">
+
+                    Belum ada pengajuan pending.
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+
+    <!-- ========================== RIWAYAT ========================== -->
+
+ <div class="card-box">
+
+    <div class="card-title d-flex justify-content-between align-items-center">
+
+        <div>
+            <i class="fa fa-history" style="color:#2563eb;"></i>
+            Riwayat Pengajuan
+        </div>
+
+        <span class="badge bg-primary fs-6">
+            {{ riwayat|length }}
+        </span>
+
+    </div>
+
+    <div class="table-responsive">
+
+        <table class="table">
+
+            <thead>
+
+                <tr>
+
+                    <th width="60">No</th>
+
+                    <th>Nama Penyewa</th>
+
+                    <th>Kamar Saat Ini</th>
+
+                    <th>Kamar Tujuan</th>
+
+                    <th>Status</th>
+
+                    <th width="120">Aksi</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for d in riwayat %}
+
+            <tr>
+
+                <td>{{ forloop.counter }}</td>
+
+                <td class="nama">{{ d.penyewa.nama }}</td>
+
+                <td>
+                    {% if d.penyewa.kamar %}
+                        {{ d.penyewa.kamar.nomor_kamar }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+
+                <td>{{ d.kamar_tujuan.nomor_kamar }}</td>
+
+                <td>
+
+                    {% if d.status == "Pending" %}
+                        <span class="status pending">
+                            <i class="fa fa-clock"></i> Pending
+                        </span>
+
+                    {% elif d.status == "Disetujui" %}
+                        <span class="status disetujui">
+                            <i class="fa fa-check-circle"></i> Disetujui
+                        </span>
+
+                    {% else %}
+                        <span class="status ditolak">
+                            <i class="fa fa-times-circle"></i> Ditolak
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    <div class="aksi">
+
+                        <a href="{% url 'hapus_riwayat_pindah' d.id %}"
+                           class="btn btn-danger"
+                           onclick="return confirm('Yakin ingin menghapus riwayat ini?')">
+
+                           <i class="fa fa-trash"></i>
+
+                        </a>
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+
+                <td colspan="6" class="kosong">
+
+                    Belum ada riwayat pengajuan.
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
 
 {% endblock %}

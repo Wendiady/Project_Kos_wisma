@@ -3,44 +3,141 @@
 {% block title %}Tagihan Saya{% endblock %}
 
 {% block content %}
+<style>
+    /* Membuat container agar ada box-nya */
+    .container {
+        max-width: 1000px;
+        margin: 20px auto;
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
 
-<h2>Tagihan Saya</h2>
+    h2 { text-align: center; margin-bottom: 20px; font-weight: bold; color: #17324f; }
 
-<table border="1" cellpadding="10" cellspacing="0" style="width:100%; background:white;">
-    <tr style="background:#3498db; color:white;">
-        <th>Bulan</th>
-        <th>Tahun</th>
-        <th>Total</th>
-        <th>Dibayar</th>
-        <th>Sisa</th>
-        <th>Status</th>
-    </tr>
+    /* Styling Tabel agar lebih rapi */
+    .table-responsive { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    th, td { padding: 12px; border: 1px solid #ddd; text-align: left; vertical-align: middle; }
+    th { background: #3b6e85; color: white; }
+    tr:nth-child(even) { background: #f9f9f9; }
 
+    /* Styling Tombol Upload */
+    .btn-upload {
+        background: #27ae60;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn-upload:hover { background: #219653; color: white; }
+
+    /* Styling Tombol Kembali (Merah Elegan) */
+    .btn-back {
+        display: inline-block;
+        padding: 10px 20px;
+        background: #e74c3c;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+    .btn-back:hover { background: #c0392b; color: white; }
+</style>
+
+<div class="container">
+    <h2>Tagihan Saya</h2>
+
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Bulan</th>
+                    <th>Tahun</th>
+                    <th>Total</th>
+                    <th>Dibayar</th>
+                    <th>Sisa</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tagihan %}
+                <tr>
+                    <td>{{ t.bulan }}</td>
+                    <td>{{ t.tahun }}</td>
+                    <td>Rp {{ t.total }}</td>
+                    <td>Rp {{ t.dibayar }}</td>
+                    <td>Rp {{ t.sisa }}</td>
+                    <td>
+                        {% if t.status == "Lunas" %}
+                            <span style="color:green; font-weight:bold;">✔ Lunas</span>
+                        {% elif t.status == "Masih Utang" %}
+                            <span style="color:orange; font-weight:bold;">⚠ Utang</span>
+                        {% else %}
+                            <span style="color:red; font-weight:bold;">✖ Belum Bayar</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if t.sisa > 0 %}
+                            <button type="button" class="btn-upload" data-bs-toggle="modal" data-bs-target="#modalUpload{{ t.id }}">
+                                Upload Bukti
+                            </button>
+                        {% else %}
+                            <span style="color: gray; font-size: 13px;">Selesai</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align:center;">Belum ada tagihan</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- MODAL POP-UP UPLOAD -->
     {% for t in tagihan %}
-    <tr>
-        <td>{{ t.bulan }}</td>
-        <td>{{ t.tahun }}</td>
-        <td>Rp {{ t.total }}</td>
-        <td>Rp {{ t.dibayar }}</td>
-        <td>Rp {{ t.sisa }}</td>
-        <td>
-            {% if t.status == "Lunas" %}
-                <span style="color:green;">✔ Lunas</span>
-            {% elif t.status == "Masih Utang" %}
-                <span style="color:orange;">⚠ Utang</span>
-            {% else %}
-                <span style="color:red;">✖ Belum Bayar</span>
-            {% endif %}
-        </td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="6" style="text-align:center;">Belum ada tagihan</td>
-    </tr>
+        {% if t.sisa > 0 %}
+        <div class="modal fade" id="modalUpload{{ t.id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form action="{% url 'upload_bukti_pembayaran' t.id %}" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="modal-header">
+                            <h5 class="modal-title" style="color: #17324f; font-weight: bold; font-size: 18px;">Upload Bukti Bayar - {{ t.bulan }} {{ t.tahun }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" style="text-align: left;">
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">Jumlah Bayar (Rp)</label>
+                                <input type="number" name="jumlah_bayar" class="form-control" value="{{ t.sisa }}" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                <small style="color: gray; display: block; margin-top: 3px;">Sisa tagihan: Rp {{ t.sisa }}</small>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">Pilih Foto Bukti Transfer</label>
+                                <input type="file" name="bukti_bayar" class="form-control" accept="image/*" required style="width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
+                            </div>
+                        </div>
+                        <div class="modal-footer" style="padding: 12px 15px; display: flex; justify-content: flex-end; gap: 10px; background: #f8f9fa; border-top: 1px solid #dee2e6;">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="padding: 6px 14px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Batal</button>
+                            <button type="submit" class="btn btn-success" style="padding: 6px 14px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer;">Kirim Bukti</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     {% endfor %}
-</table>
 
-<br>
-<a href="{% url 'dashboard_penyewa' %}" class="btn">Kembali</a>
+    <a href="{% url 'dashboard_penyewa' %}" class="btn-back">Kembali</a>
+</div>
 
 {% endblock %}

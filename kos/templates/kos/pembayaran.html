@@ -79,6 +79,20 @@ background:#3b6e85;
 color:white;
 }
 
+/* Styling Tombol Lihat Foto */
+.btn-foto {
+    display: inline-block;
+    padding: 5px 10px;
+    background: #17a2b8;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 13px;
+}
+.btn-foto:hover {
+    background: #138496;
+}
+
 </style>
 
 </head>
@@ -131,9 +145,9 @@ color:white;
 <th>Penyewa</th>
 <th>Bulan</th>
 <th>Total Tagihan</th>
-<th>Sisa Tagihan</th>
 <th>Tanggal Bayar</th>
 <th>Jumlah Bayar</th>
+<th>Bukti Bayar</th> <!-- Kolom Baru -->
 <th>Aksi</th>
 </tr>
 
@@ -147,11 +161,17 @@ color:white;
 
 <td>Rp {{ p.tagihan.total|intcomma }}</td>
 
-<td>Rp {{ p.sisa|intcomma }}</td>
-
 <td>{{ p.tanggal_bayar|date:"d F Y" }}</td>
 
 <td>Rp {{ p.jumlah_bayar|intcomma }}</td>
+
+<td>
+    {% if p.bukti_bayar %}
+        <a href="{{ p.bukti_bayar.url }}" target="_blank" class="btn-foto">Lihat Foto</a>
+    {% else %}
+        <span style="color: gray; font-size: 13px;">Tidak ada</span>
+    {% endif %}
+</td>
 
 <td>
 <a href="/hapus-pembayaran/{{ p.id }}" style="color:red;">Hapus</a>
@@ -162,7 +182,7 @@ color:white;
 {% empty %}
 
 <tr>
-<td colspan="6">Belum ada pembayaran</td>
+<td colspan="7">Belum ada pembayaran</td>
 </tr>
 
 {% endfor %}

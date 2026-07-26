@@ -85,6 +85,7 @@ class Tagihan(models.Model):
     tahun = models.IntegerField()
 
     biaya_kamar = models.IntegerField()
+    biaya_pindah = models.IntegerField(default=0)
     listrik = models.IntegerField(default=50000)
     air = models.IntegerField(default=30000)
 
@@ -125,10 +126,12 @@ class Tagihan(models.Model):
         self.rice_cooker = self.rice_cooker or 0
         self.kipas_angin = self.kipas_angin or 0
         self.biaya_kamar = self.biaya_kamar or 0
+        self.biaya_pindah = self.biaya_pindah or 0
 
         # hitung total
         self.total = (
             self.biaya_kamar +
+            self.biaya_pindah +
             self.listrik +
             self.air +
             self.wifi +
@@ -157,6 +160,7 @@ class Pembayaran(models.Model):
     tagihan = models.ForeignKey(Tagihan, on_delete=models.CASCADE)
     tanggal_bayar = models.DateField(default=timezone.now)
     jumlah_bayar = models.IntegerField()
+    bukti_bayar = models.ImageField(upload_to='bukti_pembayaran/', null=True, blank=True)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -190,7 +194,7 @@ class RequestPindahKamar(models.Model):
     penyewa = models.ForeignKey(Penyewa, on_delete=models.CASCADE)
     kamar_tujuan = models.ForeignKey(Kamar, on_delete=models.CASCADE)
     tanggal_request = models.DateTimeField(auto_now_add=True)
-
+   
     status = models.CharField(
         max_length=20,
         choices=[

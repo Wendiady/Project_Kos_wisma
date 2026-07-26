@@ -1,121 +1,158 @@
 {% extends 'kos/base_admin.html' %}
+{% load humanize %}
 
 {% block title %}Data Kamar{% endblock %}
 
 {% block content %}
 
 <style>
-.container-kamar{
-    background:white;
-    padding:20px;
-    border-radius:10px;
+.container-kamar {
+    max-width: 1100px;
+    margin: 15px auto;
+    background: #fff;
+    padding: 15px; /* Mengurangi padding agar lebih ringkas */
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,.05);
 }
 
-.header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:15px;
+/* HEADER */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
 }
 
-.btn-tambah{
-    background:#3b6e85;
-    color:white;
-    padding:8px 12px;
-    border-radius:6px;
-    text-decoration:none;
+.header h2 {
+    margin: 0;
+    font-size: 22px; /* Font judul sedikit diperkecil */
+    font-weight: 700;
+    color: #17324f;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-table{
-    width:100%;
-    border-collapse:collapse;
+.btn-tambah {
+    padding: 7px 15px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #fff;
+    font-weight: 600;
+    background: #1d74b7;
+    font-size: 14px;
+    transition: .25s;
 }
 
-th, td{
-    padding:10px;
-    border:1px solid #ddd;
-    text-align:center;
+.btn-tambah:hover {
+    background: #14598c;
+    color: white;
 }
 
-/* STATUS */
-.status-kosong{
-    background:#28a745;
-    color:white;
-    padding:5px 10px;
-    border-radius:5px;
-}
+/* TABLE - Dibuat lebih rapat agar tidak terlihat zoom */
+.table-responsive { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; border-radius: 8px; overflow: hidden; }
+thead { background: #17324f; color: white; }
+th { padding: 10px; text-align: center; font-size: 13px; font-weight: 600; }
+td { padding: 8px; text-align: center; border-bottom: 1px solid #ececec; font-size: 13px; }
+tbody tr:hover { background: #f4f8fc; }
 
-.status-terisi{
-    background:#dc3545;
-    color:white;
-    padding:5px 10px;
-    border-radius:5px;
-}
+.no { width: 40px; }
+.nomor { font-weight: 600; color: #17324f; }
+.harga { font-weight: 700; color: #000; font-size: 13px; }
 
-/* BUTTON */
-.btn-edit{
-    background:#ffc107;
-    padding:5px 8px;
-    border-radius:5px;
-    color:black;
-    text-decoration:none;
+/* STATUS - Dibuat lebih kecil */
+.status-kosong, .status-terisi { 
+    display: inline-block; 
+    padding: 3px 10px; 
+    border-radius: 20px; 
+    font-size: 11px; 
+    font-weight: 600; 
 }
+.status-kosong { background: #28a745; color: white; }
+.status-terisi { background: #dc3545; color: white; }
 
-.btn-hapus{
-    background:#dc3545;
-    padding:5px 8px;
-    border-radius:5px;
-    color:white;
-    text-decoration:none;
+/* AKSI - Dibuat lebih ringkas */
+.aksi { display: flex; justify-content: center; gap: 5px; }
+.btn-edit, .btn-hapus { 
+    padding: 4px 10px; 
+    border-radius: 5px; 
+    text-decoration: none; 
+    font-size: 11px; 
+    font-weight: 600; 
+    transition: .25s;
+}
+.btn-edit { background: #ffc107; color: black; }
+.btn-edit:hover { background: #e0a800; }
+.btn-hapus { background: #dc3545; color: white; }
+.btn-hapus:hover { background: #bb2d3b; }
+
+@media(max-width:768px){
+    .container-kamar { padding: 10px; }
+    .header { flex-direction: column; align-items: flex-start; gap: 10px; }
+    table { min-width: 600px; } /* Menyesuaikan agar responsif */
 }
 </style>
 
 <div class="container-kamar">
-
     <div class="header">
-        <h2>Data Kamar</h2>
-        <a href="/tambah-kamar/" class="btn-tambah">+ Tambah Kamar</a>
+        <h2>
+            <i class="fa-solid fa-door-open"></i>
+            Data Kamar
+        </h2>
+
+        <a href="/tambah-kamar/" class="btn-tambah">
+            <i class="fa fa-plus"></i> Tambah Kamar
+        </a>
     </div>
 
-    <table>
-        <tr>
-            <th>No Kamar</th>
-            <th>Harga</th>
-            <th>Status</th>
-            <th>Penghuni</th>
-            <th>Aksi</th>
-        </tr>
-
-        {% for k in kamar %}
-        <tr>
-            <td>{{ k.nomor_kamar }}</td>
-            <td>{{ k.harga }}</td>
-
-            <td>
-                {% if k.status == "Kosong" %}
-                    <span class="status-kosong">{{ k.status }}</span>
-                {% else %}
-                    <span class="status-terisi">{{ k.status }}</span>
-                {% endif %}
-            </td>
-
-            <td>
-                {% if k.penyewa_set.first %}
-                    {{ k.penyewa_set.first.nama }}
-                {% else %}
-                    -
-                {% endif %}
-            </td>
-
-            <td>
-                <a href="/edit-kamar/{{ k.id }}/" class="btn-edit">Edit</a>
-                <a href="/hapus-kamar/{{ k.id }}/" class="btn-hapus">Hapus</a>
-            </td>
-        </tr>
-        {% endfor %}
-
-    </table>
-
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th class="no">No</th>
+                    <th>No Kamar</th>
+                    <th>Harga</th>
+                    <th>Status</th>
+                    <th>Penghuni</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for k in kamar %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td class="nomor">{{ k.nomor_kamar }}</td>
+                    <td class="harga">Rp {{ k.harga|intcomma }}</td>
+                    <td>
+                        {% if k.status == "Kosong" %}
+                            <span class="status-kosong">{{ k.status }}</span>
+                        {% else %}
+                            <span class="status-terisi">{{ k.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if k.penyewa_set.first %}
+                            {{ k.penyewa_set.first.nama }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="aksi">
+                            <a href="/edit-kamar/{{ k.id }}/" class="btn-edit">
+                                <i class="fa fa-pen"></i> Edit
+                            </a>
+                            <a href="/hapus-kamar/{{ k.id }}/" class="btn-hapus" onclick="return confirm('Yakin ingin menghapus kamar ini?')">
+                                <i class="fa fa-trash"></i> Hapus
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 {% endblock %}

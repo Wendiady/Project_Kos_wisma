@@ -1,183 +1,141 @@
 {% extends 'kos/base_admin.html' %}
-
 {% load humanize %}
 
-{% block title %}
-Manajemen Fasilitas
-{% endblock %}
+{% block title %}Manajemen Fasilitas{% endblock %}
 
 {% block content %}
-
 <style>
-
-.judul{
-    text-align:center;
-    font-weight:bold;
-    margin-bottom:30px;
-    font-size:45px;
-}
-
-.box-fasilitas{
-    background:white;
-    padding:35px;
-    border-radius:20px;
-    box-shadow:0 0 15px rgba(0,0,0,0.08);
-    max-width:1100px;
-    margin:auto;
-}
-
-.grid-fasilitas{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-    gap:25px;
-}
-
-.item{
-    display:flex;
-    flex-direction:column;
-}
-
-.item label{
-    font-weight:bold;
-    margin-bottom:10px;
-    font-size:22px;
-    color:#2d3436;
-}
-
-.item input{
-    padding:14px;
-    border-radius:12px;
-    border:1px solid #ccc;
-    font-size:20px;
-    outline:none;
-    transition:0.3s;
-}
-
-.item input:focus{
-    border:1px solid #3b6e85;
-    box-shadow:0 0 8px rgba(59,110,133,0.3);
-}
-
-.harga-text{
-    margin-top:10px;
-    color:#3b6e85;
-    font-weight:bold;
-    font-size:24px;
-}
-
-.btn-simpan{
-    margin-top:35px;
-    background:#3b6e85;
-    color:white;
-    border:none;
-    padding:14px 28px;
-    border-radius:12px;
-    font-size:20px;
-    transition:0.3s;
-}
-
-.btn-simpan:hover{
-    background:#2c5568;
-    transform:scale(1.03);
-}
-
-/* RESPONSIVE HP */
-
-@media screen and (max-width:768px){
-
-    .judul{
-        font-size:30px;
+    .content-wrapper {
+        max-width: 800px;
+        margin: 0 auto;
     }
 
-    .box-fasilitas{
-        padding:20px;
+    /* Notifikasi */
+    .alert-success {
+        padding: 12px 15px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+        font-size: 0.9rem;
     }
 
-    .item label{
-        font-size:18px;
+    .card-minimal {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        padding: 20px;
     }
 
-    .item input{
-        font-size:16px;
+    .card-title {
+        font-size: 1.1rem;
+        color: #17324f;
+        font-weight: 700;
+        margin-bottom: 20px;
     }
 
-    .harga-text{
-        font-size:18px;
+    .grid-fasilitas {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-bottom: 20px;
     }
 
-    .btn-simpan{
-        width:100%;
-        font-size:18px;
+    .item-group {
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 8px;
     }
 
-}
+    .item-group label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #64748b;
+        margin-bottom: 5px;
+        display: block;
+    }
 
+    .item-group input {
+        width: 100%;
+        padding: 6px 10px;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 0.95rem;
+    }
+
+    .harga-tag {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #2563eb;
+        margin-top: 4px;
+    }
+
+    .btn-simpan {
+        background: #2563eb;
+        color: white;
+        border: none;
+        padding: 8px 24px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-block;
+    }
+
+    .btn-simpan:hover {
+        background: #1d4ed8;
+    }
+
+    @media(max-width: 768px) {
+        .grid-fasilitas { grid-template-columns: 1fr; }
+    }
 </style>
 
-<h1 class="judul">
-    ⚙ Manajemen Harga Fasilitas
-</h1>
-
-<div class="box-fasilitas">
-
-<form method="POST" action="{% url 'update_harga_fasilitas' %}">
-    {% csrf_token %}
-
-    <div class="grid-fasilitas">
-
-        <!-- WIFI -->
-        <div class="item">
-            <label>📶 WiFi</label>
-
-            <!-- FIX: tanpa intcomma -->
-            <input type="text" name="wifi" value="{{ harga.wifi }}">
-
-            <div class="harga-text">
-                Rp {{ harga.wifi|intcomma }}
+<div class="content-wrapper">
+    <!-- Notifikasi Sukses -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success">
+                <i class="fa fa-check-circle"></i> {{ message }}
             </div>
-        </div>
+        {% endfor %}
+    {% endif %}
 
-        <!-- AC -->
-        <div class="item">
-            <label>❄ AC</label>
+    <div class="card-minimal">
+        <h4 class="card-title">
+            <i class="fa fa-sliders-h"></i> Manajemen Fasilitas
+        </h4>
 
-            <input type="text" name="ac" value="{{ harga.ac }}">
-
-            <div class="harga-text">
-                Rp {{ harga.ac|intcomma }}
+        <form method="POST" action="{% url 'update_harga_fasilitas' %}">
+            {% csrf_token %}
+            <div class="grid-fasilitas">
+                <div class="item-group">
+                    <label><i class="fa fa-wifi"></i> WiFi</label>
+                    <input type="text" name="wifi" value="{{ harga.wifi }}">
+                    <div class="harga-tag">Rp {{ harga.wifi|intcomma }}</div>
+                </div>
+                <div class="item-group">
+                    <label><i class="fa fa-snowflake"></i> AC</label>
+                    <input type="text" name="ac" value="{{ harga.ac }}">
+                    <div class="harga-tag">Rp {{ harga.ac|intcomma }}</div>
+                </div>
+                <div class="item-group">
+                    <label><i class="fa fa-fan"></i> Kipas</label>
+                    <input type="text" name="kipas_angin" value="{{ harga.kipas_angin }}">
+                    <div class="harga-tag">Rp {{ harga.kipas_angin|intcomma }}</div>
+                </div>
+                <div class="item-group">
+                    <label><i class="fa fa-utensils"></i> Rice Cooker</label>
+                    <input type="text" name="rice_cooker" value="{{ harga.rice_cooker }}">
+                    <div class="harga-tag">Rp {{ harga.rice_cooker|intcomma }}</div>
+                </div>
             </div>
-        </div>
 
-        <!-- KIPAS -->
-        <div class="item">
-            <label>🌀 Kipas Angin</label>
-
-            <input type="text" name="kipas_angin" value="{{ harga.kipas_angin }}">
-
-            <div class="harga-text">
-                Rp {{ harga.kipas_angin|intcomma }}
-            </div>
-        </div>
-
-        <!-- RICE COOKER -->
-        <div class="item">
-            <label>🍚 Rice Cooker</label>
-
-            <input type="text" name="rice_cooker" value="{{ harga.rice_cooker }}">
-
-            <div class="harga-text">
-                Rp {{ harga.rice_cooker|intcomma }}
-            </div>
-        </div>
-
+            <button type="submit" class="btn-simpan">
+                <i class="fa fa-save"></i> Simpan
+            </button>
+        </form>
     </div>
-
-    <button type="submit" class="btn-simpan">
-        💾 Simpan Perubahan
-    </button>
-
-</form>
-
 </div>
-
 {% endblock %}

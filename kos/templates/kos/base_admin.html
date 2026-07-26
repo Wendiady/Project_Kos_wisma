@@ -1,598 +1,193 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>
-{% block title %}
-e-KAS Wisma 24 Putra
-{% endblock %}
-</title>
-
-<!-- BOOTSTRAP -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-<!-- FONT AWESOME -->
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-<!-- CHART -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
-body{
-    font-family:Arial,sans-serif;
-    background:#f4f6f9;
-    overflow-x:hidden;
-    overflow-y:auto;
-}
-
-/* ==============================
-SIDEBAR
-==============================*/
-
-.sidebar{
-    position:fixed;
-    top:0;
-    left:0;
-    width:250px;
-    height:100vh;
-    overflow-y:auto;
-
-    background:
-    linear-gradient(180deg,#17324f,#21486e,#2d648f);
-
-    box-shadow:8px 0 25px rgba(0,0,0,.15);
-
-    z-index:1000;
-}
-
-.sidebar h2{
-
-    padding:28px 15px;
-
-    color:#fff;
-
-    text-align:center;
-
-    font-weight:700;
-
-    font-size:32px;
-
-    letter-spacing:1px;
-
-    border-bottom:1px solid rgba(255,255,255,.15);
-
-}
-
-.sidebar a{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:12px;
-
-    color:#d8e5ef;
-
-    text-decoration:none;
-
-    padding:15px 22px;
-
-    transition:.35s;
-
-    font-size:15px;
-
-    border-left:4px solid transparent;
-
-}
-
-.sidebar a i{
-
-    width:22px;
-
-    text-align:center;
-
-}
-
-.sidebar a:hover{
-
-    background:rgba(255,255,255,.12);
-
-    color:white;
-
-    border-left:4px solid #5bc0ff;
-
-    padding-left:28px;
-
-}
-
-/* ==============================
-TOPBAR
-==============================*/
-.topbar{
-    margin-left:250px;
-
-    width:calc(100% - 250px);
-
-    height:60px;
-
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-
-    padding:0 25px;
-
-    background:linear-gradient(
-        90deg,
-        #1b4965,
-        #2c7da0
-    );
-
-    color:white;
-
-    position:fixed;
-    top:0;
-    left:0;
-
-    z-index:9999;
-}
-/* ==============================
-CONTENT
-==============================*/
-.content{
-    margin-left:250px;
-    width:calc(100% - 250px);
-    min-height:87vh;
-    margin-top:60px;
-
-    padding:30px;
-
-    background-image:
-        linear-gradient(
-            rgba(255,255,255,0.20),
-            rgba(255,255,255,0.70)
-        ),
-        url("/media/Slamet.jpg");
-
-    background-repeat:no-repeat;
-    background-position:center center;
-
-    /* Isi seluruh area dashboard */
-    background-size:cover;
-
-    background-attachment:fixed;
-}
-
-/* ==============================
-NOTIFIKASI
-==============================*/
-
-.notif-wrapper{
-
-    margin-left:250px;
-
-    padding:18px 35px 0;
-
-}
-
-.notif{
-
-    padding:16px;
-
-    border-radius:12px;
-
-    font-weight:600;
-
-    margin-bottom:15px;
-
-    box-shadow:0 8px 20px rgba(0,0,0,.08);
-
-}
-
-.success{
-
-    background:#d4edda;
-
-    color:#155724;
-
-}
-
-.error{
-
-    background:#f8d7da;
-
-    color:#721c24;
-
-}
-
-.warning{
-
-    background:#fff3cd;
-
-    color:#856404;
-
-}
-
-.info{
-
-    background:#d1ecf1;
-
-    color:#0c5460;
-
-}
-
-/* ==============================
-CARD
-==============================*/
-
-.card-custom{
-
-    background:rgba(255,255,255,.92);
-
-    border-radius:20px;
-
-    padding:25px;
-
-    border:none;
-
-    backdrop-filter:blur(8px);
-
-    box-shadow:
-
-    0 10px 30px rgba(0,0,0,.08);
-
-}
-
-/* ==============================
-TABLE
-==============================*/
-
-.table-responsive{
-
-    overflow:auto;
-
-    border-radius:20px;
-
-}
-
-table{
-
-    width:100%;
-
-    border-collapse:collapse;
-
-    background:white;
-
-    overflow:hidden;
-
-    border-radius:20px;
-
-}
-
-table th{
-
-    background:#17324f;
-
-    color:white;
-
-    padding:15px;
-
-    font-weight:600;
-
-}
-
-table td{
-
-    padding:14px;
-
-    border-bottom:1px solid #eee;
-
-}
-
-table tbody tr{
-
-    transition:.3s;
-
-}
-
-table tbody tr:hover{
-
-    background:#eef7ff;
-
-}
-
-/* ==============================
-BUTTON
-==============================*/
-
-.btn-custom{
-
-    background:#1d74b7;
-
-    color:white;
-
-    border:none;
-
-    border-radius:10px;
-
-    padding:11px 22px;
-
-    transition:.3s;
-
-}
-
-.btn-custom:hover{
-
-    background:#12598d;
-
-    transform:translateY(-2px);
-
-    color:white;
-
-}
-
-/* ==============================
-SCROLLBAR
-==============================*/
-
-::-webkit-scrollbar{
-
-    width:8px;
-
-}
-
-::-webkit-scrollbar-thumb{
-
-    background:#3f6b91;
-
-    border-radius:30px;
-
-}
-
-/* ==============================
-RESPONSIVE
-==============================*/
-
-@media screen and (max-width:768px){
-
-    .menu-toggle{
-        display:block;
-    }
-
-    .sidebar{
-    left:-250px;
-}
-    .sidebar.active{
-        left:0;
-    }
-
-    .topbar{
-        margin-left:0;
-        width:100%;
-        min-height:auto;
-        flex-direction:column;
-        justify-content:center;
-        align-items:center;
-        gap:10px;
-        padding:15px;
-        padding-top:70px;
-        text-align:center;
-    }
-
-    .content{
-        margin-left:0;
-        width:100%;
-        min-height:calc(100vh - 70px);
-
-        padding:15px;
-
-        background-size:260px auto;
-        background-position:center center;
-    }
-
-    .notif-wrapper{
-        margin-left:0;
-        width:100%;
-        padding:10px;
-    }
-
-    table{
-        min-width:700px;
-    }
-}
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard - e-KAS Wisma 24 Putra{% endblock %}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        html, body { width: 100%; height: 100%; background: #F8FAFC; overflow-x: hidden !important; }
+
+        .sidebar { 
+            position: fixed; top: 0; left: 0; width: 260px; height: 100vh; 
+            background: linear-gradient(180deg, #E6F7ED 0%, #F1FAF4 40%, #FFFFFF 100%); 
+            display: flex; flex-direction: column; transition: .3s ease; z-index: 999; 
+            border-right: 1px solid #E2E8F0;
+        }
+        .sidebar.collapsed { width: 80px; }
+        .sidebar.collapsed .logo-area h2, .sidebar.collapsed .logo-area p, .sidebar.collapsed .sidebar-menu-wrapper a span, .sidebar.collapsed .sidebar-date-box { display: none !important; }
+        .sidebar.collapsed .sidebar-menu-wrapper a { justify-content: center; padding: 15px 0; }
+
+        .logo-area { padding: 25px 24px 15px 24px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .logo-icon { width: 64px; height: 56px; display: flex; justify-content: center; align-items: center; margin-bottom: 12px; transition: all 0.2s ease; }
+        .logo-icon svg { width: 100%; height: 100%; }
+        .sidebar.collapsed .logo-icon { width: 44px; height: 38px; margin-bottom: 0; }
+        
+        .logo-area h2 { font-size: 19px; font-weight: 700; color: #0A4D2B; }
+        .logo-area p { font-size: 11.5px; color: #4B5563; margin-top: 4px; }
+
+        .sidebar-menu-wrapper { flex: 1; overflow-y: auto; padding: 10px 14px; }
+        .sidebar a { 
+            display: flex; align-items: center; gap: 12px; margin-bottom: 6px; padding: 11px 16px; border-radius: 12px; 
+            font-size: 13.5px; font-weight: 600; color: #0A4D2B; text-decoration: none; transition: .2s ease; 
+        }
+        .sidebar a i { width: 20px; font-size: 16px; text-align: center; font-weight: 700; }
+        
+        .sidebar a.active { 
+            background: rgba(255, 255, 255, 0.6) !important; 
+            color: #0A4D2B !important; 
+            font-weight: 700; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); 
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .sidebar-date-box { 
+            margin: auto 16px 24px 16px; padding: 14px 16px; background: rgba(255, 255, 255, 0.4); 
+            border: 1px solid rgba(0, 181, 106, 0.1); border-radius: 16px; display: flex; align-items: center; gap: 12px; 
+        }
+        .date-box-icon { width: 38px; height: 38px; background: #EAFEF2; color: #00B56A; border-radius: 10px; display: flex; justify-content: center; align-items: center; }
+        .date-box-text { display: flex; flex-direction: column; line-height: 1.3; color: #0A4D2B; }
+
+        .topbar, #topbar { 
+            position: fixed !important; top: 0 !important; left: 260px !important; width: calc(100% - 260px) !important; 
+            height: 70px !important; padding: 0 32px !important; background: #5c67f2 !important; 
+            display: flex !important; align-items: center !important; justify-content: space-between !important; 
+            z-index: 997 !important; transition: all 0.3s ease !important; box-shadow: 0 2px 10px rgba(0,0,0,0.08) !important;
+        }
+        .topbar.collapsed, body.sidebar-collapsed-active .topbar, #topbar.collapsed { left: 80px !important; width: calc(100% - 80px) !important; }
+        
+        .top-left { display: flex; align-items: center; gap: 15px; }
+        .topbar-title { font-weight: 600 !important; font-size: 18px !important; color: #FFFFFF !important; }
+        
+        .user-area-right { display: flex !important; align-items: center !important; gap: 16px !important; }
+        .user-box { color: #FFFFFF !important; font-size: 14px; }
+        .logout-btn { color: #FFFFFF !important; font-size: 14px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 6px; }
+        .logout-btn i { color: #EF4444 !important; } 
+        
+        /* Tombol Toggle Putih Transparan */
+        .toggle-btn { 
+            width: 32px !important; height: 32px !important; 
+            background: rgba(255, 255, 255, 0.15) !important; 
+            border: 1px solid rgba(255, 255, 255, 0.25) !important; 
+            border-radius: 8px !important; 
+            cursor: pointer; display: inline-flex !important; align-items: center; justify-content: center; 
+            transition: 0.2s ease;
+        }
+        .toggle-btn i { font-size: 10px !important; color: #FFFFFF !important; transition: 0.3s; }
+        .toggle-btn:hover { background: rgba(255, 255, 255, 0.25) !important; }
+
+        .content { margin-left: 260px; margin-top: 78px; padding: 24px 32px 32px 32px; transition: .3s ease; }
+        .content.collapsed, body.sidebar-collapsed-active .content { margin-left: 80px; }
+
+        /* Welcome Banner dengan Gelembung */
+        .welcome-banner { 
+            position: relative; overflow: hidden; 
+            background: linear-gradient(135deg, #5AD79B 0%, #39C389 100%) !important; 
+            border-radius: 16px; padding: 30px !important;
+        }
+        .welcome-banner::before { content: ''; position: absolute; width: 170px; height: 170px; background: rgba(255, 255, 255, 0.22); border-radius: 50%; top: -55px; left: -45px; z-index: 1; }
+        .welcome-banner::after { content: ''; position: absolute; width: 240px; height: 240px; background: rgba(255, 255, 255, 0.18); border-radius: 50%; bottom: -90px; right: -50px; z-index: 1; }
+        .welcome-banner h2, .welcome-banner p { position: relative; z-index: 2; color: #FFFFFF !important; }
+
+        @media(max-width: 992px) {
+            .sidebar { left: -260px; }
+            .sidebar.active { left: 0; }
+            .topbar, #topbar { left: 0 !important; width: 100% !important; }
+            .content { margin-left: 0; padding: 16px; margin-top: 80px; }
+        }
+    </style>
 </head>
-
 <body>
 
-<!-- OVERLAY -->
-<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
-
-<!-- TOMBOL MENU -->
-<button class="menu-toggle" onclick="toggleSidebar()">
-    <i class="fa fa-bars"></i>
-</button>
-
-<!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
-
-    <h2>🏠 Wisma 24</h2>
-
-    {% if user.is_authenticated %}
-
-        {% if user.penyewa %}
-
-            <a href="/dashboard-penyewa/">
-                <i class="fa fa-home"></i> Dashboard
-            </a>
-
-            <a href="/tagihan/">
-                <i class="fa fa-file-invoice"></i> Tagihan
-            </a>
-
-            <a href="/pembayaran/">
-                <i class="fa fa-money-bill"></i> Pembayaran
-            </a>
-
-            <a href="/ajukan-pindah/">
-                <i class="fa fa-bed"></i> Pindah Kamar
-            </a>
-
-        {% else %}
-
-            <a href="/">
-                <i class="fa fa-home"></i> Dashboard
-            </a>
-
-            <a href="/kamar/">
-                <i class="fa fa-door-open"></i> Kamar
-            </a>
-
-            <a href="/penyewa/">
-                <i class="fa fa-users"></i> Penyewa
-            </a>
-
-            <a href="/tagihan/">
-                <i class="fa fa-file-invoice-dollar"></i> Tagihan
-            </a>
-
-            <a href="/pembayaran/">
-                <i class="fa fa-wallet"></i> Pembayaran
-            </a>
-
-            <a href="/pengeluaran/">
-                <i class="fa fa-money-check"></i> Pengeluaran
-            </a>
-
-            <a href="/laporan-keuangan/">
-                <i class="fa fa-chart-line"></i> Laporan
-            </a>
-
-            <a href="{% url 'grafik' %}">
-                <i class="fa fa-chart-bar"></i> Grafik
-            </a>
-
-            <!-- MENU FASILITAS -->
-            <a href="{% url 'manajemen_fasilitas' %}">
-                <i class="fa fa-sliders-h"></i>
-                Manajemen Fasilitas
-            </a>
-
-            <a href="{% url 'approval_kamar' %}">
-                <i class="fa fa-exchange-alt"></i>
-                Approval Pindah Kamar
-            </a>
-
-        {% endif %}
-
-    {% endif %}
-
-</div>
-
-<!-- TOPBAR -->
-<div class="topbar">
-
-    <div>
-        {% block topbar_title %}
-        Dashboard
-        {% endblock %}
-    </div>
-
-    <div>
-
-        {% if user.is_authenticated %}
-
-            Halo, {{ user.username }} |
-
-            <a href="/logout/"
-            style="color:white; text-decoration:none;">
-                Logout
-            </a>
-
-        {% else %}
-
-            <a href="/login/"
-            style="color:white; text-decoration:none;">
-                Login
-            </a>
-
-        {% endif %}
-
-    </div>
-
-</div>
-
-<!-- NOTIFIKASI -->
-{% if messages %}
-
-<div class="notif-wrapper">
-
-    {% for message in messages %}
-
-        <div class="notif
-
-        {% if message.tags == 'success' %}
-            success
-
-        {% elif message.tags == 'error' %}
-            error
-
-        {% elif message.tags == 'warning' %}
-            warning
-
-        {% else %}
-            info
-        {% endif %}
-
-        ">
-
-            {{ message }}
-
+    <div class="logo-area">
+        <div class="logo-icon">
+            <svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15,40 C15,18 48,18 48,38 C48,55 20,72 15,85 L60,85" fill="none" stroke="#FF3B30" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M90,85 L90,15 L65,60 L108,60" fill="none" stroke="#00A2FF" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
         </div>
+        <h2>Wisma Putra</h2>
+        <p>Sistem Informasi Kost</p>
+    </div>
 
-    {% endfor %}
+    <div class="sidebar-menu-wrapper">
+        {% if user.is_authenticated %}
+            {% if user.penyewa %}
+                <a href="/dashboard-penyewa/" class="{% if request.path == '/dashboard-penyewa/' %}active{% endif %}"><i class="fa-solid fa-house"></i> <span>Dashboard</span></a>
+                <a href="/tagihan/" class="{% if request.path == '/tagihan/' %}active{% endif %}"><i class="fa-solid fa-file-invoice"></i> <span>Tagihan</span></a>
+                <a href="/pembayaran/" class="{% if request.path == '/pembayaran/' %}active{% endif %}"><i class="fa-solid fa-credit-card"></i> <span>Pembayaran</span></a>
+                <a href="/ajukan-pindah/" class="{% if request.path == '/ajukan-pindah/' %}active{% endif %}"><i class="fa-solid fa-arrow-right-arrow-left"></i> <span>Pindah Kamar</span></a>
+            {% else %}
+                <a href="/" class="{% if request.path == '/' %}active{% endif %}"><i class="fa-solid fa-house"></i> <span>Dashboard</span></a>
+                <a href="/kamar/" class="{% if request.path == '/kamar/' %}active{% endif %}"><i class="fa-solid fa-bed"></i> <span>Data Kamar</span></a>
+                <a href="/penyewa/" class="{% if request.path == '/penyewa/' %}active{% endif %}"><i class="fa-solid fa-users"></i> <span>Penyewa</span></a>
+                <a href="/tagihan/" class="{% if request.path == '/tagihan/' %}active{% endif %}"><i class="fa-solid fa-file-invoice"></i> <span>Tagihan</span></a>
+                <a href="/pembayaran/" class="{% if request.path == '/pembayaran/' %}active{% endif %}"><i class="fa-solid fa-wallet"></i> <span>Pembayaran</span></a>
+                <a href="/pengeluaran/" class="{% if request.path == '/pengeluaran/' %}active{% endif %}"><i class="fa-solid fa-money-bill-wave"></i> <span>Pengeluaran</span></a>
+                <a href="/laporan-keuangan/" class="{% if request.path == '/laporan-keuangan/' %}active{% endif %}"><i class="fa-solid fa-chart-line"></i> <span>Laporan Keuangan</span></a>
+                <a href="{% url 'grafik' %}" class="{% if request.resolver_match.url_name == 'grafik' %}active{% endif %}"><i class="fa-solid fa-chart-pie"></i> <span>Grafik</span></a>
+                <a href="{% url 'manajemen_fasilitas' %}" class="{% if request.resolver_match.url_name == 'manajemen_fasilitas' %}active{% endif %}"><i class="fa-solid fa-screwdriver-wrench"></i> <span>Manajemen Fasilitas</span></a>
+                <a href="{% url 'approval_kamar' %}" class="{% if request.resolver_match.url_name == 'approval_kamar' %}active{% endif %}"><i class="fa-solid fa-circle-check"></i> <span>Approval Pindah</span></a>
+            {% endif %}
+        {% endif %}
+    </div>
 
+    <div class="sidebar-date-box">
+        <div class="date-box-icon"><i class="fa-solid fa-calendar-days"></i></div>
+        <div class="date-box-text">
+            <strong id="sideTanggal">--</strong>
+            <span id="sideHariJam">--</span>
+        </div>
+    </div>
 </div>
 
-{% endif %}
-
-<!-- CONTENT -->
-<div class="content">
-
-    {% block content %}
-    {% endblock %}
-
+<div class="topbar" id="topbar">
+    <div class="top-left">
+        <button class="toggle-btn" onclick="toggleSidebar()"><i class="fa-solid fa-chevron-left"></i></button>
+        <div class="topbar-title">{% block topbar_title %}Dashboard{% endblock %}</div>
+    </div>
+    <div class="user-area-right">
+        <div class="user-box">Halo, <strong>Admin</strong></div>
+        <a href="/logout/" class="logout-btn"><i class="fa-solid fa-sign-out-alt"></i> Keluar</a>
+    </div>
 </div>
 
-<!-- SCRIPT -->
+<div class="content" id="content">
+    {% block content %}{% endblock %}
+</div>
+
 <script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        const topbar = document.getElementById("topbar");
+        const content = document.getElementById("content");
+        const icon = document.querySelector(".toggle-btn i");
 
-function toggleSidebar(){
+        if (window.innerWidth <= 992) {
+            sidebar.classList.toggle("active");
+        } else {
+            document.body.classList.toggle("sidebar-collapsed-active");
+            sidebar.classList.toggle("collapsed");
+            topbar.classList.toggle("collapsed");
+            content.classList.toggle("collapsed");
+            icon.style.transform = sidebar.classList.contains("collapsed") ? "rotate(180deg)" : "rotate(0deg)";
+        }
+    }
 
-    document
-    .getElementById("sidebar")
-    .classList
-    .toggle("active");
-
-    document
-    .getElementById("overlay")
-    .classList
-    .toggle("active");
-
-}
-
+    function updateWaktu(){
+        const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+        const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        const skrg = new Date();
+        document.getElementById("sideTanggal").innerHTML = skrg.getDate() + " " + bulan[skrg.getMonth()] + " " + skrg.getFullYear();
+        document.getElementById("sideHariJam").innerHTML = hari[skrg.getDay()] + ", " + String(skrg.getHours()).padStart(2,'0') + ":" + String(skrg.getMinutes()).padStart(2,'0');
+    }
+    setInterval(updateWaktu, 1000); updateWaktu();
 </script>
 
 </body>

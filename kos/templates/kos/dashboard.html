@@ -1,232 +1,322 @@
 {% extends 'kos/base_admin.html' %}
 {% load humanize %}
 
-{% block title %}
-Dashboard
-{% endblock %}
+{% block title %}Wisma 24 Putra{% endblock %}
+{% block topbar_title %}Dashboard{% endblock %}
 
 {% block content %}
-
+<!-- CSS Gabungan Sempurna: Bersih Kotak Putih Topbar, Anti-Scroll, & Jarak Mepet Atas -->
 <style>
-
-/* =========================
-JUDUL
-========================= */
-
-.judul-dashboard{
-
-    text-align:center;
-
-    margin:0;
-
-    padding-top:20px;
-
-    padding-bottom:20px;
-
-    font-weight:700;
-
-    color:#1f2d3d;
-}
-
-/* =========================
-CARD DASHBOARD (COMPACT VERSION)
-========================= */
-
-.dashboard-card{
-    border:none;
-    border-radius:14px;
-    color:white;
-    transition:0.25s ease;
-    overflow:hidden;
-    box-shadow:0 4px 12px rgba(0,0,0,0.08);
-}
-
-.dashboard-card:hover{
-    transform:translateY(-4px);
-    box-shadow:0 6px 16px rgba(0,0,0,0.12);
-}
-
-.dashboard-card .card-body{
-    padding:18px;
-}
-
-.dashboard-card i{
-    font-size:30px;
-    margin-bottom:8px;
-}
-
-.dashboard-card h5{
-    font-size:16px;
-    margin-bottom:6px;
-    font-weight:600;
-}
-
-.dashboard-card h3{
-    font-weight:bold;
-    font-size:24px;
-    margin:0;
-}
-
-/* =========================
-WARNA CARD
-========================= */
-
-.bg-blue{ background:#3498db; }
-.bg-green{ background:#2ecc71; }
-.bg-orange{ background:#f39c12; }
-.bg-red{ background:#e74c3c; }
-.bg-purple{ background:#6f42c1; }
-.bg-tosca{ background:#20c997; }
-
-/* =========================
-ALERT TELAT (COMPACT)
-========================= */
-
-.alert-telat{
-    background:#fff8e1;
-    border-left:6px solid #ffc107;
-    padding:18px;
-    border-radius:12px;
-    margin-top:25px;
-    box-shadow:0 3px 10px rgba(0,0,0,0.06);
-}
-
-.alert-telat h5{
-    font-size:20px;
-    margin-bottom:10px;
-    color:#856404;
-    font-weight:700;
-}
-
-.alert-telat ul{
-    margin-top:8px;
-    padding-left:18px;
-}
-
-.alert-telat li{
-    font-size:15px;
-    margin-bottom:6px;
-}
-
-/* =========================
-RESPONSIVE
-========================= */
-
-@media screen and (max-width:768px){
-
-    .judul-dashboard{
-        font-size:24px;
+    /* 1. PENYESUAIAN ANTAR-MUKA TOPBAR (HILANGKAN BACKGROUND PUTIH & RESET WARNA) */
+    .topbar-title, 
+    .topbar-title *, 
+    [block="topbar_title"], 
+    .topbar-title span, 
+    .topbar-title div { 
+        background: transparent !important; 
+        background-color: transparent !important; 
+        color: #FFFFFF !important; 
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
     }
 
-    .dashboard-card .card-body{
-        padding:14px;
+    /* 2. SIDEBAR PAS (ANTI-SCROLL) */
+    .sidebar, [class*="sidebar"], [class*="side-nav"], .sidebar-wrapper {
+        overflow-y: hidden !important;
+    }
+    .sidebar li, .sidebar .nav-item, [class*="sidebar"] li, [class*="sidebar"] .nav-item {
+        margin-bottom: 2px !important;
+    }
+    .sidebar a, .sidebar .nav-link, [class*="sidebar"] a, [class*="sidebar"] .nav-link {
+        padding-top: 6px !important;
+        padding-bottom: 6px !important;
+        font-size: 13.5px !important;
+    }
+    [class*="brand"], [class*="logo"], .sidebar-header {
+        padding-top: 10px !important;
+        padding-bottom: 5px !important;
     }
 
-    .dashboard-card i{
-        font-size:24px;
+    /* 3. LAYOUT MAIN CONTENT DASHBOARD (DIPAKSA NAIK MEPET KE ATAS) */
+    .dashboard-wrapper {
+        padding: 0px 22px 22px 22px !important;
+        background-color: #F8FAFC;
+        font-family: 'Poppins', sans-serif;
     }
 
-    .dashboard-card h5{
-        font-size:14px;
+    .welcome-banner {
+        background: linear-gradient(135deg, #6BE3AD 0%, #3BCA8D 100%);
+        border-radius: 14px;
+        padding: 26px 22px;
+        color: white;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(59, 202, 141, 0.1);
+        margin-bottom: 22px;
+    }
+    .welcome-banner h2 {
+        font-size: 26px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        letter-spacing: -0.5px;
+    }
+    .welcome-banner p {
+        font-size: 14px;
+        opacity: 0.95;
+        margin: 0;
     }
 
-    .dashboard-card h3{
-        font-size:20px;
+    .dashboard-card {
+        background: #FFFFFF;
+        border-radius: 14px;
+        padding: 20px 24px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.01);
+        border: 1px solid #F1F5F9;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        height: 100%;
+        min-height: 118px;
+        background-repeat: no-repeat;
+        background-position: bottom right;
+        background-size: 115px auto;
     }
 
-    .alert-telat h5{
-        font-size:18px;
+    .card-pemasukan { border-bottom: 4px solid #00B56A; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40'%3E%3Cpath d='M0,40 Q25,25 50,35 T100,20 L100,40 Z' fill='none' stroke='%2300B56A' stroke-width='1' opacity='0.25'/%3E%3C/svg%3E"); }
+    .card-pengeluaran { border-bottom: 4px solid #FF2D78; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40'%3E%3Cpath d='M0,40 Q25,20 50,35 T100,15 L100,40 Z' fill='none' stroke='%23FF2D78' stroke-width='1' opacity='0.25'/%3E%3C/svg%3E"); }
+    .card-total-kamar { border-bottom: 4px solid #FF9F1C; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40'%3E%3Cpath d='M0,35 Q25,40 50,25 T100,30 L100,40 Z' fill='none' stroke='%23FF9F1C' stroke-width='1' opacity='0.25'/%3E%3C/svg%3E"); }
+    .card-total-penyewa { border-bottom: 4px solid #3B82F6; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40'%3E%3Cpath d='M0,40 Q25,25 50,35 T100,20 L100,40 Z' fill='none' stroke='%233B82F6' stroke-width='1' opacity='0.25'/%3E%3C/svg%3E"); }
+    .card-kamar-terisi { border-bottom: 4px solid #8B5CF6; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40'%3E%3Cpath d='M0,35 Q25,40 50,25 T100,30 L100,40 Z' fill='none' stroke='%238B5CF6' stroke-width='1' opacity='0.25'/%3E%3C/svg%3E"); }
+    .card-kamar-kosong { border-bottom: 4px solid #EF4444; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40'%3E%3Cpath d='M0,40 Q25,20 50,35 T100,15 L100,40 Z' fill='none' stroke='%23EF4444' stroke-width='1' opacity='0.25'/%3E%3C/svg%3E"); }
+
+    .card-body-flex {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        width: 100%;
+        position: relative;
+        z-index: 2;
     }
 
-    .alert-telat li{
-        font-size:14px;
+    .card-icon-circle {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 22px;
+        color: white;
+        flex-shrink: 0;
     }
-}
+    .icon-pemasukan { background: #00B56A; }
+    .icon-pengeluaran { background: #FF2D78; }
+    .icon-total-kamar { background: #FF9F1C; }
+    .icon-total-penyewa { background: #3B82F6; }
+    .icon-kamar-terisi { background: #8B5CF6; }
+    .icon-kamar-kosong { background: #EF4444; }
 
+    .card-info-stack {
+        display: flex;
+        flex-direction: column;
+    }
+    .card-info-stack h5 {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        margin: 0 0 3px 0;
+    }
+    .text-pemasukan { color: #00B56A; }
+    .text-pengeluaran { color: #FF2D78; }
+    .text-total-kamar { color: #FF9F1C; }
+    .text-total-penyewa { color: #3B82F6; }
+    .text-kamar-terisi { color: #8B5CF6; }
+    .text-kamar-kosong { color: #EF4444; }
+
+    .card-info-stack h3 {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1F2937;
+        margin: 0 0 3px 0;
+        letter-spacing: -0.4px;
+    }
+    .card-info-stack small {
+        font-size: 12px;
+        color: #6B7280;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .card-info-stack small i {
+        color: #9CA3AF;
+        font-size: 13px;
+    }
+
+    /* Styling Kotak Peringatan */
+    .warning-box {
+        background-color: #FFFDF4 !important;
+        border: 1px solid #FFEFC6 !important;
+        border-left: 4px solid #F59E0B !important;
+        border-radius: 12px;
+        padding: 16px 22px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 10px rgba(245, 158, 11, 0.02);
+        margin-top: 26px !important;
+    }
+    .warning-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+    .warning-icon {
+        color: #F59E0B;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+    }
+    .warning-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1F2937;
+    }
+    .warning-box ul li {
+        font-size: 13px;
+        color: #4B5563;
+        margin-top: 3px;
+    }
+    
+    /* Styling Tautan pada Nama Penyewa */
+    .nama-penyewa-link {
+        color: #D97706;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.15s ease-in-out;
+    }
+    .nama-penyewa-link:hover {
+        color: #B45309;
+        text-decoration: underline;
+    }
 </style>
 
-<h2 class="judul-dashboard">
-    Selamat Datang di Sistem Kos Wisma 24 Putra
-</h2>
+<div class="dashboard-wrapper">
+    <!-- BANNER SELAMAT DATANG -->
+    <div class="welcome-banner">
+        <h2>Selamat Datang, {{ user.username }}</h2>
+        <p>Sistem Informasi Pengelolaan Kost Wisma 24 Putra</p>
+    </div>
 
-<!-- CARD DASHBOARD -->
-<div class="row g-3">
+    <!-- GRID CARD STATISTIK -->
+    <div class="row g-3">
+        <!-- Card 1: Pemasukan -->
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="dashboard-card card-pemasukan">
+                <div class="card-body-flex">
+                    <div class="card-icon-circle icon-pemasukan"><i class="fa-solid fa-wallet"></i></div>
+                    <div class="card-info-stack">
+                        <h5 class="text-pemasukan">Total Pemasukan</h5>
+                        <h3>Rp {{ total_pemasukan|intcomma }}</h3>
+                        <small><i class="fa-solid fa-calendar-days"></i> Data bulan ini</small>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <div class="col-lg-4 col-md-6">
-        <div class="card dashboard-card bg-blue">
-            <div class="card-body text-center">
-                <i class="fa fa-money-bill-wave"></i>
-                <h5>Pemasukan</h5>
-                <h3>Rp {{ total_pemasukan|intcomma }}</h3>
+        <!-- Card 2: Pengeluaran -->
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="dashboard-card card-pengeluaran">
+                <div class="card-body-flex">
+                    <div class="card-icon-circle icon-pengeluaran"><i class="fa-solid fa-wallet"></i></div>
+                    <div class="card-info-stack">
+                        <h5 class="text-pengeluaran">Total Pengeluaran</h5>
+                        <h3>Rp {{ total_pengeluaran|intcomma }}</h3>
+                        <small><i class="fa-solid fa-receipt"></i> Biaya Operasional</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 3: Total Kamar -->
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="dashboard-card card-total-kamar">
+                <div class="card-body-flex">
+                    <div class="card-icon-circle icon-total-kamar"><i class="fa-solid fa-building"></i></div>
+                    <div class="card-info-stack">
+                        <h5 class="text-total-kamar">Total Kamar</h5>
+                        <h3>{{ total_kamar }}</h3>
+                        <small><i class="fa-solid fa-hotel"></i> Seluruh kamar tersedia</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 4: Total Penyewa -->
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="dashboard-card card-total-penyewa">
+                <div class="card-body-flex">
+                    <div class="card-icon-circle icon-total-penyewa"><i class="fa-solid fa-users"></i></div>
+                    <div class="card-info-stack">
+                        <h5 class="text-total-penyewa">Total Penyewa</h5>
+                        <h3>{{ total_penyewa }}</h3>
+                        <small><i class="fa-solid fa-user"></i> Penyewa Aktif</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 5: Kamar Terisi -->
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="dashboard-card card-kamar-terisi">
+                <div class="card-body-flex">
+                    <div class="card-icon-circle icon-kamar-terisi"><i class="fa-solid fa-bed"></i></div>
+                    <div class="card-info-stack">
+                        <h5 class="text-kamar-terisi">Kamar Terisi</h5>
+                        <h3>{{ kamar_terisi }}</h3>
+                        <small><i class="fa-solid fa-circle-check"></i> Sedang Ditempati</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 6: Kamar Kosong -->
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="dashboard-card card-kamar-kosong">
+                <div class="card-body-flex">
+                    <div class="card-icon-circle icon-kamar-kosong"><i class="fa-solid fa-house"></i></div>
+                    <div class="card-info-stack">
+                        <h5 class="text-kamar-kosong">Kamar Kosong</h5>
+                        <h3>{{ kamar_kosong }}</h3>
+                        <small><i class="fa-solid fa-key"></i> Siap Disewakan</small>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="col-lg-4 col-md-6">
-        <div class="card dashboard-card bg-green">
-            <div class="card-body text-center">
-                <i class="fa fa-wallet"></i>
-                <h5>Pengeluaran</h5>
-                <h3>Rp {{ total_pengeluaran|intcomma }}</h3>
+    <!-- NOTIFIKASI WARNING (LINK DIARAHKAN KE DETAIL TAGIHAN MASING-MASING PENYEWA) -->
+    {% if jumlah_telat > 0 %}
+    <div class="warning-box">
+        <div class="warning-left">
+            <div class="warning-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div>
+                <div class="warning-title">{{ jumlah_telat }} Penyewa Telat Bayar</div>
+                <ul class="list-unstyled mb-0">
+                    {% for t in telat_list %}
+                    <li class="d-flex align-items-center gap-2">
+                        <span style="color: #F59E0B; font-size: 8px;">●</span>
+                        <span>
+                            <a href="{% url 'detail_tagihan' t.id %}" class="nama-penyewa-link">{{ t.penyewa.nama }}</a> 
+                            - jatuh tempo {{ t.jatuh_tempo }}
+                        </span>
+                    </li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
     </div>
-
-    <div class="col-lg-4 col-md-6">
-        <div class="card dashboard-card bg-orange">
-            <div class="card-body text-center">
-                <i class="fa fa-door-open"></i>
-                <h5>Total Kamar</h5>
-                <h3>{{ total_kamar }}</h3>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4 col-md-6">
-        <div class="card dashboard-card bg-red">
-            <div class="card-body text-center">
-                <i class="fa fa-users"></i>
-                <h5>Total Penyewa</h5>
-                <h3>{{ total_penyewa }}</h3>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4 col-md-6">
-        <div class="card dashboard-card bg-purple">
-            <div class="card-body text-center">
-                <i class="fa fa-bed"></i>
-                <h5>Kamar Terisi</h5>
-                <h3>{{ kamar_terisi }}</h3>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4 col-md-6">
-        <div class="card dashboard-card bg-tosca">
-            <div class="card-body text-center">
-                <i class="fa fa-house-user"></i>
-                <h5>Kamar Kosong</h5>
-                <h3>{{ kamar_kosong }}</h3>
-            </div>
-        </div>
-    </div>
-
+    {% endif %}
 </div>
-
-<!-- ALERT TELAT -->
-{% if jumlah_telat > 0 %}
-<div class="alert-telat">
-
-    <h5>⚠ {{ jumlah_telat }} Penyewa Telat Bayar</h5>
-
-    <ul>
-        {% for t in telat_list %}
-        <li>{{ t.penyewa.nama }} - jatuh tempo {{ t.jatuh_tempo }}</li>
-        {% endfor %}
-    </ul>
-
-</div>
-{% endif %}
-
 {% endblock %}
