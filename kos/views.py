@@ -34,6 +34,7 @@ def update_harga_fasilitas(request):
         return redirect('dashboard')
 
 @login_required
+@login_required
 def dashboard(request):
 
     if hasattr(request.user, 'penyewa'):
@@ -64,9 +65,8 @@ def dashboard(request):
 
     total_penyewa = Penyewa.objects.filter(status='Aktif').count()
 
-    # 🔥 DIUBAH: Menghilangkan filter 'Lunas' dan menjumlahkan kolom 'dibayar' agar cicilan ikut masuk
-    total_pemasukan = Tagihan.objects.aggregate(
-        total=Sum('dibayar')
+    total_pemasukan = Pembayaran.objects.aggregate(
+        total=Sum('jumlah_bayar')
     )['total'] or 0
 
     total_pengeluaran = Pengeluaran.objects.aggregate(
@@ -87,7 +87,7 @@ def dashboard(request):
     jumlah_telat = telat_list.count()
 
     # =========================
-    # GRAFIK DATA
+    # GRAFIK DATA (PEMASUKAN, PENGELUARAN, SALDO)
     # =========================
     bulan_convert = {
         "January": "Januari","February": "Februari","March": "Maret",
@@ -107,19 +107,20 @@ def dashboard(request):
         "Juli","Agustus","September","Oktober","November","Desember"
     ]
 
-    # 🔥 DIUBAH: Grafik sekarang membaca jumlah uang yang sudah 'dibayar' (bukan cuma yang lunas)
-    pemasukan = Tagihan.objects.values('bulan').annotate(total=Sum('dibayar'))
+    pemasukan = Pembayaran.objects.values('tagihan__bulan').annotate(total=Sum('jumlah_bayar'))
     pengeluaran = Pengeluaran.objects.values('tanggal__month').annotate(total=Sum('jumlah'))
 
     semua_bulan = set()
 
     for p in pemasukan:
-        semua_bulan.add(bulan_convert.get(p['bulan'], p['bulan']))
+        bulan_asli = p['tagihan__bulan']
+        if bulan_asli:
+            semua_bulan.add(bulan_convert.get(bulan_asli, bulan_asli))
 
     for p in pengeluaran:
         semua_bulan.add(bulan_map[p['tanggal__month']])
 
-    semua_bulan = sorted(semua_bulan, key=lambda x: urutan.index(x))
+    semua_bulan = sorted(list(semua_bulan), key=lambda x: urutan.index(x) if x in urutan else 0)
 
     labels = []
     data_pemasukan = []
@@ -129,7 +130,7 @@ def dashboard(request):
         labels.append(bulan)
 
         total_pemasukan_bulan = next(
-            (x['total'] for x in pemasukan if bulan_convert.get(x['bulan'], x['bulan']) == bulan),
+            (x['total'] for x in pemasukan if bulan_convert.get(x['tagihan__bulan'], x['tagihan__bulan']) == bulan),
             0
         )
 
@@ -138,13 +139,13 @@ def dashboard(request):
             0
         )
 
-        # Jika hasil sum bertipe None, ubah jadi 0
         total_pemasukan_bulan = total_pemasukan_bulan or 0
         total_pengeluaran_bulan = total_pengeluaran_bulan or 0
 
         data_pemasukan.append(total_pemasukan_bulan)
         data_pengeluaran.append(total_pengeluaran_bulan)
 
+    # Grafik Saldo / Keuangan Bersih per Bulan
     data_saldo = [
         data_pemasukan[i] - data_pengeluaran[i]
         for i in range(len(data_pemasukan))
@@ -166,16 +167,17 @@ def dashboard(request):
         'jumlah_telat': jumlah_telat,
         'telat_list': telat_list,
 
+        # Data Grafik yang dikirim ke Template Dashboard
         'chart_labels': labels,
         'chart_pemasukan': data_pemasukan,
         'chart_pengeluaran': data_pengeluaran,
         'chart_saldo': data_saldo,
 
-        # 🔥 TAMBAHAN BARU
         'harga': harga,
     }
 
     return render(request, 'kos/dashboard.html', context)
+
 # DATA KAMAR
 @login_required
 def daftar_kamar(request):
@@ -218,8 +220,8 @@ def riwayat_penyewa(request):
 # DATA TAGIHAN
 @login_required
 def daftar_tagihan(request):
-
-    data = Tagihan.objects.all().order_by('tahun', 'bulan')
+    # Urutkan berdasarkan tahun dan bulan
+    data = Tagihan.objects.all().order_by('-tahun', '-bulan')
 
     # KONVERSI BULAN KE INDONESIA
     bulan_convert = {
@@ -237,17 +239,11 @@ def daftar_tagihan(request):
         "December": "Desember"
     }
 
-    grouped = defaultdict(list)
-
     for t in data:
-    # CONVERT BULAN DI SINI
-        bulan = bulan_convert.get(t.bulan, t.bulan)
-
-        key = f"{bulan} {t.tahun}"
-        grouped[key].append(t)
+        t.bulan = bulan_convert.get(t.bulan, t.bulan)
 
     context = {
-        'grouped_tagihan': dict(grouped)
+        'tagihan_list': data
     }
 
     return render(request, 'kos/tagihan.html', context)
@@ -595,32 +591,31 @@ def edit_penyewa(request, id):
 # HAPUS PENYEWA
 @login_required
 def hapus_penyewa(request, id):
-
     penyewa = Penyewa.objects.get(id=id)
-
     kamar = penyewa.kamar
 
-    # kamar kembali kosong
-    kamar.status = "Kosong"
-    kamar.save()
+    # Kamar kembali kosong (diberi pengecekan agar aman jika penyewa tidak punya kamar)
+    if kamar:
+        kamar.status = "Kosong"
+        kamar.save()
 
     penyewa.delete()
 
     return redirect('/penyewa/')
-
+    
 @login_required
 def keluar_penyewa(request, id):
-
     penyewa = Penyewa.objects.get(id=id)
 
     penyewa.status = "Keluar"
     penyewa.tanggal_keluar = date.today()
     penyewa.save()
 
-    # kamar jadi kosong
+    # kamar jadi kosong (diberi pengecekan agar aman jika penyewa tidak punya kamar)
     kamar = penyewa.kamar
-    kamar.status = "Kosong"
-    kamar.save()
+    if kamar:
+        kamar.status = "Kosong"
+        kamar.save()
 
     return redirect('/penyewa/')
 
@@ -632,22 +627,18 @@ def daftar_pengeluaran(request):
 
     pengeluaran = Pengeluaran.objects.all().order_by('-tanggal')
 
-    # FILTER
-    if bulan and tahun:
-        pengeluaran = pengeluaran.filter(
-            tanggal__month=int(bulan),
-            tanggal__year=int(tahun)
-        )
-    elif tahun:
-        pengeluaran = pengeluaran.filter(
-            tanggal__year=int(tahun)
-        )
+    # FILTER (Ubah jadi terpisah seperti ini)
+    if bulan:
+        pengeluaran = pengeluaran.filter(tanggal__month=int(bulan))
+    
+    if tahun:
+        pengeluaran = pengeluaran.filter(tanggal__year=int(tahun))
 
     total_pengeluaran = pengeluaran.aggregate(
         total=Sum('jumlah')
     )['total'] or 0
 
-    # 🔥 INI YANG PENTING (AMBIL SEMUA TAHUN DARI DATA)
+    # AMBIL SEMUA TAHUN DARI DATA
     tahun_list = Pengeluaran.objects.dates('tanggal', 'year')
 
     context = {
@@ -687,7 +678,6 @@ def tambah_pengeluaran(request):
 
 @login_required
 def laporan_keuangan(request):
-
     bulan_inggris_ke_indo = {
         "January": "Januari", "February": "Februari", "March": "Maret",
         "April": "April", "May": "Mei", "June": "Juni",
@@ -695,9 +685,17 @@ def laporan_keuangan(request):
         "October": "Oktober", "November": "November", "December": "Desember"
     }
 
-    # 🔥 DIUBAH: Mengambil semua tagihan yang sudah ada uang masuk (dibayar lebih besar dari 0)
-    tagihan = Tagihan.objects.filter(dibayar__gt=0)
-    pengeluaran = Pengeluaran.objects.all()
+    urutan = [
+        "Januari","Februari","Maret","April","Mei","Juni",
+        "Juli","Agustus","September","Oktober","November","Desember"
+    ]
+
+    pembayaran_list = Pembayaran.objects.select_related('tagihan__penyewa').all()
+    pengeluaran_list = Pengeluaran.objects.all().order_by('-tanggal')
+    
+    total_pembayaran = pembayaran_list.aggregate(total=Sum('jumlah_bayar'))['total'] or 0
+    total_pengeluaran = pengeluaran_list.aggregate(total=Sum('jumlah'))['total'] or 0
+    saldo_akhir_total = total_pembayaran - total_pengeluaran
 
     grouped = defaultdict(lambda: {
         "pemasukan": [],
@@ -707,21 +705,15 @@ def laporan_keuangan(request):
         "saldo": 0
     })
 
-    # =========================
-    # PEMASUKAN
-    # =========================
-    for t in tagihan:
-        bulan = bulan_inggris_ke_indo.get(t.bulan, t.bulan)
-        key = f"{bulan} {t.tahun}"
+    for p in pembayaran_list:
+        bulan_en = p.tagihan.bulan
+        bulan = bulan_inggris_ke_indo.get(bulan_en, bulan_en)
+        key = f"{bulan} {p.tagihan.tahun}"
 
-        grouped[key]["pemasukan"].append(t)
-        # 🔥 DIUBAH: Yang dijumlahkan ke total pemasukan laporan adalah nominal 'dibayar' (cicilannya)
-        grouped[key]["total_pemasukan"] += t.dibayar
+        grouped[key]["pemasukan"].append(p)
+        grouped[key]["total_pemasukan"] += p.jumlah_bayar
 
-    # =========================
-    # PENGELUARAN
-    # =========================
-    for p in pengeluaran:
+    for p in pengeluaran_list:
         bulan_en = p.tanggal.strftime("%B")
         bulan = bulan_inggris_ke_indo.get(bulan_en, bulan_en)
         key = f"{bulan} {p.tanggal.year}"
@@ -729,19 +721,35 @@ def laporan_keuangan(request):
         grouped[key]["pengeluaran"].append(p)
         grouped[key]["total_pengeluaran"] += p.jumlah
 
-    # =========================
-    # HITUNG SALDO PER BULAN
-    # =========================
     for key in grouped:
         grouped[key]["saldo"] = (
-            grouped[key]["total_pemasukan"] -
+            grouped[key]["total_pemasukan"] - 
             grouped[key]["total_pengeluaran"]
         )
 
-    context = {
-        "grouped": dict(grouped)
-    }
+    semua_bulan = sorted(grouped.keys(), key=lambda x: urutan.index(x.split()[0]) if x.split()[0] in urutan else 0)
 
+    chart_labels = []
+    chart_pemasukan = []
+    chart_pengeluaran = []
+
+    for key in semua_bulan:
+        chart_labels.append(key)
+        chart_pemasukan.append(grouped[key]["total_pemasukan"])
+        chart_pengeluaran.append(grouped[key]["total_pengeluaran"])
+
+    context = {
+        'pembayaran_list': pembayaran_list,
+        'pengeluaran_list': pengeluaran_list,
+        'total_pembayaran': total_pembayaran,
+        'total_pengeluaran': total_pengeluaran,
+        'saldo_akhir_total': saldo_akhir_total,
+        'grouped': dict(grouped),
+        'chart_labels': chart_labels,
+        'chart_pemasukan': chart_pemasukan,
+        'chart_pengeluaran': chart_pengeluaran,
+    }
+    
     return render(request, 'kos/laporan_keuangan.html', context)
 
 def format_rupiah(angka):
@@ -1085,7 +1093,6 @@ def login_view(request):
 
 
 def login_penyewa(request):
-    # Cek apakah sudah login
     if request.user.is_authenticated:
         if hasattr(request.user, 'penyewa'):
             return redirect('dashboard_penyewa')
@@ -1095,29 +1102,34 @@ def login_penyewa(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
-
+        
         if user:
+            # Pastikan yang login di sini adalah benar-benar penyewa (memiliki relasi penyewa)
             if hasattr(user, 'penyewa'):
-                login(request, user)
-                return redirect('dashboard_penyewa')
+                if user.is_active:
+                    login(request, user)
+                    
+                    # Cek status penyewa
+                    if user.penyewa.status == "Pending":
+                        messages.warning(request, 'Akun anda belum diaktifkan oleh admin!')
+                    
+                    return redirect('dashboard_penyewa')
+                else:
+                    messages.error(request, 'Akun anda dinonaktifkan!')
             else:
-                messages.error(request, 'Akun ini bukan penyewa!')
+                messages.error(request, 'Akun ini bukan akun penyewa. Gunakan login admin!')
         else:
             messages.error(request, 'Username atau password salah!')
 
     return render(request, 'kos/login_penyewa.html')
 
-
 def logout_view(request):
-    # Kita cek dulu tipe user-nya sebelum logout untuk menentukan arah redirect
-    is_penyewa = hasattr(request.user, 'penyewa')
+    # Logout user dari sesi
     logout(request)
     messages.success(request, 'Anda berhasil logout!')
     
-    if is_penyewa:
-        return redirect('login_penyewa')
-    return redirect('login') # Ganti 'login' dengan nama url login admin Anda
-
+    # Langsung arahkan semuanya kembali ke halaman Home (Landing Page)
+    return redirect('landing')
 
 # =========================
 # DASHBOARD PENYEWA
@@ -1377,7 +1389,11 @@ def profil_penyewa(request):
 def ajukan_pindah_kamar(request):
     penyewa = get_object_or_404(Penyewa, user=request.user)
 
-    kamar_list = Kamar.objects.filter(status='Kosong')
+    # KAMAR LIST: Ambil kamar kosong, KECUALI kamar yang sedang ditempati saat ini
+    if penyewa.kamar:
+        kamar_list = Kamar.objects.filter(status='Kosong').exclude(id=penyewa.kamar.id)
+    else:
+        kamar_list = Kamar.objects.filter(status='Kosong')
 
     if request.method == 'POST':
         kamar_id = request.POST.get('kamar')
@@ -1387,6 +1403,11 @@ def ajukan_pindah_kamar(request):
             return redirect('ajukan_pindah')
 
         kamar = get_object_or_404(Kamar, id=kamar_id)
+
+        # CEK APAKAH KAMAR TUJUAN SAMA DENGAN KAMAR SAAT INI (Pengaman tambahan)
+        if penyewa.kamar and kamar == penyewa.kamar:
+            messages.error(request, "Anda tidak bisa memilih kamar yang sedang Anda tempati saat ini!")
+            return redirect('ajukan_pindah')
 
         # CEK SUDAH ADA REQUEST PENDING
         if RequestPindahKamar.objects.filter(
@@ -1398,6 +1419,7 @@ def ajukan_pindah_kamar(request):
 
         RequestPindahKamar.objects.create(
             penyewa=penyewa,
+            kamar_asal=penyewa.kamar,
             kamar_tujuan=kamar,
             status='Pending'
         )
@@ -1408,16 +1430,16 @@ def ajukan_pindah_kamar(request):
     return render(request, 'kos/ajukan_pindah.html', {
         'kamar_list': kamar_list
     })
-
-
 # =========================
 # APPROVAL ADMIN
 # =========================
 @login_required
 def approval_kamar(request):
-
-    pending = RequestPindahKamar.objects.all()
-    riwayat = RequestPindahKamar.objects.all()
+    # Tabel atas: Hanya menampilkan yang masih Pending
+    pending = RequestPindahKamar.objects.filter(status='Pending')
+    
+    # Tabel bawah (Riwayat): Menampilkan yang sudah Disetujui, Ditolak, atau Selesai
+    riwayat = RequestPindahKamar.objects.exclude(status='Pending')
 
     return render(request, 'kos/approval_kamar.html', {
         'pending': pending,
@@ -1434,6 +1456,10 @@ def setujui_kamar(request, id):
     penyewa = req.penyewa
     kamar_baru = req.kamar_tujuan
 
+    # --- TAMBAHAN: UBAH REQUEST LAMA YANG 'Disetujui' MENJADI 'Selesai' ---
+    RequestPindahKamar.objects.filter(penyewa=penyewa, status='Disetujui').update(status='Selesai')
+    # ---------------------------------------------------------------------
+
     # KAMAR LAMA -> KOSONG
     if penyewa.kamar:
         kamar_lama = penyewa.kamar
@@ -1448,11 +1474,11 @@ def setujui_kamar(request, id):
     penyewa.kamar = kamar_baru
     penyewa.save()
 
-    # UPDATE REQUEST
+    # UPDATE REQUEST YANG BARU
     req.status = "Disetujui"
     req.save()
 
-    # --- TAMBAHAN: OTOMATIS TAMBAH BIAYA PINDAH KE TAGIHAN AKTIF ---
+    # --- OTOMATIS TAMBAH BIAYA PINDAH KE TAGIHAN AKTIF ---
     tagihan_aktif = Tagihan.objects.filter(
         penyewa=penyewa, 
         status__in=['Belum Bayar', 'Masih Utang']
@@ -1460,12 +1486,11 @@ def setujui_kamar(request, id):
     
     if tagihan_aktif:
         tagihan_aktif.biaya_pindah = 50000
-        tagihan_aktif.save()  # Ini akan memicu fungsi save() di model Tagihan untuk menghitung ulang total, sisa, dan status secara otomatis!
+        tagihan_aktif.save()  
     # -------------------------------------------------------------
 
     messages.success(request, "Pindah kamar disetujui dan biaya administrasi telah ditambahkan ke tagihan!")
     return redirect('approval_kamar')
-
 # =========================
 # TOLAK PINDAH KAMAR
 # =========================
@@ -1589,3 +1614,9 @@ def upload_bukti_pembayaran(request, tagihan_id):
             )
             
         return redirect('tagihan_penyewa')
+
+def landing(request):
+    return render(request, 'kos/landing.html')
+
+def login_choice(request):
+    return render(request, 'kos/login_choice.html')

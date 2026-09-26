@@ -158,6 +158,11 @@ Dashboard Penyewa
                                                 Disetujui
                                             </span>
 
+                                        {% elif r.status == "Selesai" %}
+                                            <span class="badge bg-secondary">
+                                                Selesai
+                                            </span>
+
                                         {% elif r.status == "Ditolak" %}
                                             <span class="badge bg-danger">
                                                 Ditolak

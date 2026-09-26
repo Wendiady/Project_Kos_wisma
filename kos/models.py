@@ -192,6 +192,7 @@ class Pengeluaran(models.Model):
 
 class RequestPindahKamar(models.Model):
     penyewa = models.ForeignKey(Penyewa, on_delete=models.CASCADE)
+    kamar_asal = models.ForeignKey(Kamar, on_delete=models.SET_NULL, null=True, blank=True, related_name='pindah_asal') # <--- INI WAJIB ADA
     kamar_tujuan = models.ForeignKey(Kamar, on_delete=models.CASCADE)
     tanggal_request = models.DateTimeField(auto_now_add=True)
    
@@ -200,10 +201,12 @@ class RequestPindahKamar(models.Model):
         choices=[
             ('Pending', 'Pending'),
             ('Disetujui', 'Disetujui'),
-            ('Ditolak', 'Ditolak')
+            ('Ditolak', 'Ditolak'),
+            ('Selesai', 'Selesai'),
         ],
         default='Pending'
     )
 
     def __str__(self):
+        asal = self.kamar_asal.nomor_kamar if self.kamar_asal else "-"
         return f"{self.penyewa.nama} → {self.kamar_tujuan.nomor_kamar}"

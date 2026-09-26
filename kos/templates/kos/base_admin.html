@@ -13,11 +13,12 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         html, body { width: 100%; height: 100%; background: #F8FAFC; overflow-x: hidden !important; }
 
+        /* SIDEBAR DENGAN GRADASI HIJAU YANG JAUH LEBIH CERAH DAN HIDUP */
         .sidebar { 
             position: fixed; top: 0; left: 0; width: 260px; height: 100vh; 
-            background: linear-gradient(180deg, #E6F7ED 0%, #F1FAF4 40%, #FFFFFF 100%); 
+            background: linear-gradient(180deg, #A7F3D0 0%, #C6F6D5 40%, #E6FFFA 100%); 
             display: flex; flex-direction: column; transition: .3s ease; z-index: 999; 
-            border-right: 1px solid #E2E8F0;
+            border-right: 1px solid #9AE6B4;
         }
         .sidebar.collapsed { width: 80px; }
         .sidebar.collapsed .logo-area h2, .sidebar.collapsed .logo-area p, .sidebar.collapsed .sidebar-menu-wrapper a span, .sidebar.collapsed .sidebar-date-box { display: none !important; }
@@ -29,7 +30,7 @@
         .sidebar.collapsed .logo-icon { width: 44px; height: 38px; margin-bottom: 0; }
         
         .logo-area h2 { font-size: 19px; font-weight: 700; color: #0A4D2B; }
-        .logo-area p { font-size: 11.5px; color: #4B5563; margin-top: 4px; }
+        .logo-area p { font-size: 11.5px; color: #374151; margin-top: 4px; }
 
         .sidebar-menu-wrapper { flex: 1; overflow-y: auto; padding: 10px 14px; }
         .sidebar a { 
@@ -39,18 +40,18 @@
         .sidebar a i { width: 20px; font-size: 16px; text-align: center; font-weight: 700; }
         
         .sidebar a.active { 
-            background: rgba(255, 255, 255, 0.6) !important; 
+            background: rgba(255, 255, 255, 0.9) !important; 
             color: #0A4D2B !important; 
             font-weight: 700; 
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); 
-            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); 
+            border: 1px solid rgba(255, 255, 255, 1);
         }
 
         .sidebar-date-box { 
-            margin: auto 16px 24px 16px; padding: 14px 16px; background: rgba(255, 255, 255, 0.4); 
-            border: 1px solid rgba(0, 181, 106, 0.1); border-radius: 16px; display: flex; align-items: center; gap: 12px; 
+            margin: auto 16px 24px 16px; padding: 14px 16px; background: rgba(255, 255, 255, 0.75); 
+            border: 1px solid rgba(0, 181, 106, 0.2); border-radius: 16px; display: flex; align-items: center; gap: 12px; 
         }
-        .date-box-icon { width: 38px; height: 38px; background: #EAFEF2; color: #00B56A; border-radius: 10px; display: flex; justify-content: center; align-items: center; }
+        .date-box-icon { width: 38px; height: 38px; background: #D1FAE5; color: #059669; border-radius: 10px; display: flex; justify-content: center; align-items: center; }
         .date-box-text { display: flex; flex-direction: column; line-height: 1.3; color: #0A4D2B; }
 
         .topbar, #topbar { 
@@ -69,7 +70,6 @@
         .logout-btn { color: #FFFFFF !important; font-size: 14px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 6px; }
         .logout-btn i { color: #EF4444 !important; } 
         
-        /* Tombol Toggle Putih Transparan */
         .toggle-btn { 
             width: 32px !important; height: 32px !important; 
             background: rgba(255, 255, 255, 0.15) !important; 
@@ -84,7 +84,6 @@
         .content { margin-left: 260px; margin-top: 78px; padding: 24px 32px 32px 32px; transition: .3s ease; }
         .content.collapsed, body.sidebar-collapsed-active .content { margin-left: 80px; }
 
-        /* Welcome Banner dengan Gelembung */
         .welcome-banner { 
             position: relative; overflow: hidden; 
             background: linear-gradient(135deg, #5AD79B 0%, #39C389 100%) !important; 
@@ -124,14 +123,19 @@
                 <a href="/pembayaran/" class="{% if request.path == '/pembayaran/' %}active{% endif %}"><i class="fa-solid fa-credit-card"></i> <span>Pembayaran</span></a>
                 <a href="/ajukan-pindah/" class="{% if request.path == '/ajukan-pindah/' %}active{% endif %}"><i class="fa-solid fa-arrow-right-arrow-left"></i> <span>Pindah Kamar</span></a>
             {% else %}
-                <a href="/" class="{% if request.path == '/' %}active{% endif %}"><i class="fa-solid fa-house"></i> <span>Dashboard</span></a>
+                <!-- DIPERBAIKI: Mengarahkan langsung ke /dashboard/ -->
+                <a href="/dashboard/" class="{% if request.path == '/dashboard/' %}active{% endif %}"><i class="fa-solid fa-house"></i> <span>Dashboard</span></a>
                 <a href="/kamar/" class="{% if request.path == '/kamar/' %}active{% endif %}"><i class="fa-solid fa-bed"></i> <span>Data Kamar</span></a>
                 <a href="/penyewa/" class="{% if request.path == '/penyewa/' %}active{% endif %}"><i class="fa-solid fa-users"></i> <span>Penyewa</span></a>
                 <a href="/tagihan/" class="{% if request.path == '/tagihan/' %}active{% endif %}"><i class="fa-solid fa-file-invoice"></i> <span>Tagihan</span></a>
                 <a href="/pembayaran/" class="{% if request.path == '/pembayaran/' %}active{% endif %}"><i class="fa-solid fa-wallet"></i> <span>Pembayaran</span></a>
                 <a href="/pengeluaran/" class="{% if request.path == '/pengeluaran/' %}active{% endif %}"><i class="fa-solid fa-money-bill-wave"></i> <span>Pengeluaran</span></a>
-                <a href="/laporan-keuangan/" class="{% if request.path == '/laporan-keuangan/' %}active{% endif %}"><i class="fa-solid fa-chart-line"></i> <span>Laporan Keuangan</span></a>
-                <a href="{% url 'grafik' %}" class="{% if request.resolver_match.url_name == 'grafik' %}active{% endif %}"><i class="fa-solid fa-chart-pie"></i> <span>Grafik</span></a>
+                
+                <!-- MENU LAPORAN KEUANGAN -->
+                <a href="{% url 'laporan_keuangan' %}" class="{% if request.resolver_match.url_name == 'laporan_keuangan' %}active{% endif %}">
+                    <i class="fa-solid fa-chart-line"></i> <span>Laporan Keuangan</span>
+                </a>
+
                 <a href="{% url 'manajemen_fasilitas' %}" class="{% if request.resolver_match.url_name == 'manajemen_fasilitas' %}active{% endif %}"><i class="fa-solid fa-screwdriver-wrench"></i> <span>Manajemen Fasilitas</span></a>
                 <a href="{% url 'approval_kamar' %}" class="{% if request.resolver_match.url_name == 'approval_kamar' %}active{% endif %}"><i class="fa-solid fa-circle-check"></i> <span>Approval Pindah</span></a>
             {% endif %}

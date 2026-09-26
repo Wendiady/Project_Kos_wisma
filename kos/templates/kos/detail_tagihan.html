@@ -134,7 +134,6 @@ hr {
         <span>Rp {{ tagihan.biaya_kamar|intcomma }}</span>
     </div>
 
-    <!-- BIAYA PINDAH KAMAR (Hanya tampil jika nilainya > 0) -->
     {% if tagihan.biaya_pindah > 0 %}
     <div class="row">
         <span>Biaya Pindah Kamar</span>
@@ -194,8 +193,12 @@ hr {
     </div>
 
     <div class="btn-container">
-        <a href="{% url 'dashboard' %}" class="btn">Kembali</a>
-        <button onclick="window.print()" class="btn">🖨 Cetak Struk</button>
+        <a href="javascript:history.back()" class="btn">Kembali</a>
+        
+        <!-- TOMBOL CETAK HANYA MUNCUL JIKA YANG LOGIN ADMIN (is_staff / is_superuser) -->
+        {% if request.user.is_staff or request.user.is_superuser %}
+            <button onclick="window.print()" class="btn">🖨 Cetak Struk</button>
+        {% endif %}
     </div>
 
 </div>

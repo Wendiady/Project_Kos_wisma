@@ -4,26 +4,53 @@
 <head>
     <meta charset="UTF-8">
     <title>Laporan Keuangan Wisma 24</title>
+    <!-- Masukkan Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4; padding: 20px; color: #333; }
         .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
         
-        /* Tombol */
-        .btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        /* Tombol Utama */
+        .btn-group { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         .btn { padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer; text-decoration: none; font-weight: bold; transition: 0.3s; }
         .btn-back { background: #64748b; }
         .btn-print { background: #059669; }
         .btn-pdf { background: #dc2626; }
+        .btn-toggle { background: #0284c7; }
         .btn:hover { opacity: 0.8; }
 
-        /* Judul (Dikecilkan agar hemat tempat) */
+        /* Judul */
         .main-header { background: #059669; color: white; padding: 10px; text-align: center; border-radius: 5px; margin-bottom: 15px; }
         .main-header h1 { font-size: 18px; margin: 5px 0; }
         .main-header p { font-size: 14px; margin: 0; }
         
-        /* Box Periode & Tabel */
-        .period-box { background: #1e293b; color: white; padding: 8px; border-radius: 5px 5px 0 0; margin-top: 15px; font-weight: bold; font-size: 14px; }
-        .content-box { border: 1px solid #e2e8f0; padding: 15px; border-radius: 0 0 5px 5px; background: #fff; margin-bottom: 20px; }
+        /* Box Grafik (Default Tersembunyi) */
+        .chart-container-wrapper { display: none !important; margin-bottom: 20px; }
+        .chart-box { background: #fff; border: 1px solid #e2e8f0; padding: 15px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .chart-title { font-size: 15px; font-weight: bold; color: #059669; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        
+        .chart-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media (min-width: 768px) {
+            .chart-grid { grid-template-columns: 2fr 1fr; }
+        }
+
+        /* --- STYLING TAB BULAN (KEREN & MODERN) --- */
+        .tab-menu { display: flex; gap: 8px; margin-bottom: 15px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; overflow-x: auto; }
+        .tab-btn { background: #e2e8f0; color: #475569; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: all 0.2s; white-space: nowrap; font-size: 13px; }
+        .tab-btn:hover { background: #cbd5e1; }
+        .tab-btn.active { background: #1e293b; color: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+
+        /* Konten Per Tab */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .period-box { background: #1e293b; color: white; padding: 10px 15px; border-radius: 5px 5px 0 0; font-weight: bold; font-size: 14px; }
+        .content-box { border: 1px solid #e2e8f0; padding: 15px; border-radius: 0 0 5px 5px; background: #fff; margin-bottom: 20px; border-top: none; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 5px; margin-bottom: 15px; font-size: 14px; }
         th { background: #059669; color: white; padding: 8px; border: 1px solid #ddd; text-align: left; }
@@ -31,16 +58,14 @@
         tr:nth-child(even) { background-color: #f8fafc; }
         
         .section-label { color: #059669; font-weight: bold; font-size: 14px; border-bottom: 2px solid #059669; padding-bottom: 3px; margin-bottom: 8px; }
-        .summary { text-align: right; margin-top: 10px; padding-top: 10px; border-top: 2px solid #059669; }
-        .summary p { margin: 3px 0; font-size: 14px; }
-        .saldo-akhir { font-size: 16px; color: #059669; font-weight: bold; }
 
-        /* Optimasi Cetak (A4) */
+        /* Optimasi Cetak (A4) - Menampilkan semua tab saat dicetak */
         @media print {
             @page { size: A4; margin: 1cm; }
             body { background: white; padding: 0; }
             .container { box-shadow: none; width: 100% !important; max-width: 100% !important; margin: 0; padding: 0; }
-            .btn-group { display: none !important; }
+            .btn-group, .chart-container-wrapper, .tab-menu { display: none !important; }
+            .tab-content { display: block !important; margin-bottom: 25px; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             .period-box { background: #1e293b !important; color: white !important; }
             th { background: #059669 !important; color: white !important; }
@@ -51,7 +76,9 @@
 
 <div class="container">
     <div class="btn-group">
-        <a href="/" class="btn btn-back">Kembali</a>
+        <!-- Tombol Kembali diarahkan ke /dashboard/ -->
+        <a href="/dashboard/" class="btn btn-back">Kembali</a>
+        <button onclick="toggleView()" class="btn btn-toggle" id="btnToggleText">📊 Tampilkan Grafik</button>
         <button onclick="window.print()" class="btn btn-print">🖨 Cetak Laporan</button>
         <a href="{% url 'download_pdf' %}" class="btn btn-pdf">📄 Download PDF</a>
     </div>
@@ -61,60 +88,200 @@
         <p>Rekapitulasi Pemasukan dan Pengeluaran</p>
     </div>
 
-    {% for bulan, data in grouped.items %}
-    <div class="period-box">📅 Periode: {{ bulan }}</div>
-    <div class="content-box">
-        
-        <div class="section-label">A. Data Pemasukan</div>
-        <table>
-            <thead>
-                <tr>
-                    <th>No</th><th>Nama Penyewa</th><th>Keterangan</th><th>Jumlah</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in data.pemasukan %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ p.penyewa.nama }}</td>
-                    <td>{{ p.status }}</td>
-                    <td>Rp {{ p.dibayar|intcomma }}</td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="4" style="text-align:center;">Tidak ada data pemasukan</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <div class="section-label">B. Data Pengeluaran</div>
-        <table>
-            <thead>
-                <tr>
-                    <th>No</th><th>Tanggal</th><th>Keterangan</th><th>Jumlah</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in data.pengeluaran %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ p.tanggal|date:"d F Y" }}</td>
-                    <td>{{ p.keterangan }}</td>
-                    <td>Rp {{ p.jumlah|intcomma }}</td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="4" style="text-align:center;">Tidak ada catatan pengeluaran</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <div class="summary">
-            <p>Total Pemasukan : Rp {{ data.total_pemasukan|intcomma }}</p>
-            <p>Total Pengeluaran : Rp {{ data.total_pengeluaran|intcomma }}</p>
-            <p class="saldo-akhir">Saldo Akhir : Rp {{ data.saldo|intcomma }}</p>
+    <!-- KOTAK GRAFIK -->
+    <div class="chart-container-wrapper" id="chartWrapper">
+        <div class="chart-grid">
+            <div class="chart-box">
+                <div class="chart-title">📊 Grafik Perbandingan Bulanan</div>
+                <div style="width: 100%; height: 260px;">
+                    <canvas id="financialChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-box">
+                <div class="chart-title">🍩 Rasio Keuangan Total</div>
+                <div style="width: 100%; height: 260px; display: flex; justify-content: center; align-items: center;">
+                    <canvas id="doughnutChart"></canvas>
+                </div>
+            </div>
         </div>
     </div>
-    {% endfor %}
+
+    <!-- BAGIAN TABEL LAPORAN (Sistem Tab Menu Bulan) -->
+    <div id="tableContentWrapper">
+        
+        <!-- Tombol Tab Menu Berdasarkan Bulan (Otomatis dari looping data) -->
+        <div class="tab-menu">
+            {% for bulan, data in grouped.items %}
+            <button class="tab-btn {% if forloop.first %}active{% endif %}" onclick="openTab(event, 'tab-{{ forloop.counter }}')">
+                📅 {{ bulan }}
+            </button>
+            {% endfor %}
+        </div>
+
+        <!-- Konten Tabel Per Bulan -->
+        {% for bulan, data in grouped.items %}
+        <div id="tab-{{ forloop.counter }}" class="tab-content {% if forloop.first %}active{% endif %}">
+            <div class="period-box">📅 Periode: {{ bulan }}</div>
+            <div class="content-box">
+                
+                <div class="section-label">A. Data Pemasukan</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th><th>Nama Penyewa</th><th>Keterangan</th><th>Jumlah</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in data.pemasukan %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ p.tagihan.penyewa.nama }}</td>
+                            <td>{{ p.tagihan.bulan }} {{ p.tagihan.tahun }}</td>
+                            <td>Rp {{ p.jumlah_bayar|intcomma }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" style="text-align:center;">Tidak ada data pemasukan</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="section-label">B. Data Pengeluaran</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th><th>Tanggal</th><th>Keterangan</th><th>Jumlah</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in data.pengeluaran %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ p.tanggal|date:"d F Y" }}</td>
+                            <td>{{ p.keterangan }}</td>
+                            <td>Rp {{ p.jumlah|intcomma }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" style="text-align:center;">Tidak ada catatan pengeluaran</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
 </div>
+
+<!-- SCRIPT SISTEM TAB & GRAFIK -->
+<script>
+    let chartInited = false;
+    let financialChart, doughnutChart;
+
+    // Fungsi Ganti Tab Bulan
+    function openTab(evt, tabId) {
+        const tabContents = document.getElementsByClassName("tab-content");
+        for (let i = 0; i < tabContents.length; i++) {
+            tabContents[i].classList.remove("active");
+        }
+
+        const tabButtons = document.getElementsByClassName("tab-btn");
+        for (let i = 0; i < tabButtons.length; i++) {
+            tabButtons[i].classList.remove("active");
+        }
+
+        document.getElementById(tabId).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+
+    // Fungsi Toggle Grafik vs Tabel
+    function toggleView() {
+        const chartWrapper = document.getElementById('chartWrapper');
+        const tableWrapper = document.getElementById('tableContentWrapper');
+        const btnText = document.getElementById('btnToggleText');
+        
+        const currentDisplay = window.getComputedStyle(chartWrapper).display;
+
+        if (currentDisplay === 'none') {
+            chartWrapper.style.setProperty('display', 'block', 'important');
+            tableWrapper.style.setProperty('display', 'none', 'important');
+            btnText.innerHTML = '📋 Tampilkan Tabel Laporan';
+
+            if (!chartInited) {
+                initCharts();
+                chartInited = true;
+            }
+        } else {
+            chartWrapper.style.setProperty('display', 'none', 'important');
+            tableWrapper.style.setProperty('display', 'block', 'important');
+            btnText.innerHTML = '📊 Tampilkan Grafik';
+        }
+    }
+
+    function initCharts() {
+        const ctxBar = document.getElementById('financialChart').getContext('2d');
+        financialChart = new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: {{ chart_labels|safe }},
+                datasets: [
+                    {
+                        label: 'Pemasukan (Rp)',
+                        data: {{ chart_pemasukan|safe }},
+                        backgroundColor: 'rgba(5, 150, 105, 0.75)',
+                        borderColor: 'rgba(5, 150, 105, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Pengeluaran (Rp)',
+                        data: {{ chart_pengeluaran|safe }},
+                        backgroundColor: 'rgba(220, 38, 38, 0.75)',
+                        borderColor: 'rgba(220, 38, 38, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');
+        doughnutChart = new Chart(ctxDoughnut, {
+            type: 'doughnut',
+            data: {
+                labels: ['Total Pemasukan', 'Total Pengeluaran'],
+                datasets: [{
+                    data: [{{ total_pembayaran }}, {{ total_pengeluaran }}],
+                    backgroundColor: ['rgba(5, 150, 105, 0.85)', 'rgba(220, 38, 38, 0.85)'],
+                    borderColor: ['rgba(5, 150, 105, 1)', 'rgba(220, 38, 38, 1)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 12,
+                            font: { size: 11 }
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
 
 </body>
 </html>

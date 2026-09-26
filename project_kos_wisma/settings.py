@@ -104,11 +104,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/3.2/topics/i18n/
+# https://docs.numpy.org/en/3.2/topics/i18n/
 
 LANGUAGE_CODE = 'id'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Jakarta'
 
 USE_I18N = True
 
@@ -122,6 +122,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
 # MEDIA FILE (UPLOAD FOTO KTP)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -134,13 +138,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ======================
 # AUTH LOGIN SYSTEM
 # ======================
-
+LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
-
-
-# ======================
-# TIME ZONE INDONESIA
-# ======================
-
-TIME_ZONE = 'Asia/Jakarta'

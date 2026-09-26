@@ -1,4 +1,5 @@
 {% extends 'kos/base_user.html' %}
+{% load humanize %}  <!-- 👈 WAJIB DITAMBAHKAN DI PALING ATAS AGAR FORMAT TITIK AKTIF -->
 
 {% block title %}Tagihan Saya{% endblock %}
 
@@ -23,7 +24,21 @@
     th { background: #3b6e85; color: white; }
     tr:nth-child(even) { background: #f9f9f9; }
 
-    /* Styling Tombol Upload */
+    /* Styling Tombol Detail & Upload */
+    .btn-detail {
+        background: #3b6e85;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        text-decoration: none;
+        display: inline-block;
+        margin-bottom: 5px;
+    }
+    .btn-detail:hover { background: #2c5f73; color: white; }
+
     .btn-upload {
         background: #27ae60;
         color: white;
@@ -72,9 +87,9 @@
                 <tr>
                     <td>{{ t.bulan }}</td>
                     <td>{{ t.tahun }}</td>
-                    <td>Rp {{ t.total }}</td>
-                    <td>Rp {{ t.dibayar }}</td>
-                    <td>Rp {{ t.sisa }}</td>
+                    <td>Rp {{ t.total|intcomma }}</td>
+                    <td>Rp {{ t.dibayar|intcomma }}</td>
+                    <td>Rp {{ t.sisa|intcomma }}</td>
                     <td>
                         {% if t.status == "Lunas" %}
                             <span style="color:green; font-weight:bold;">✔ Lunas</span>
@@ -85,12 +100,15 @@
                         {% endif %}
                     </td>
                     <td>
+                        <!-- TOMBOL DETAIL TAGIHAN -->
+                        <a href="{% url 'detail_tagihan' t.id %}" class="btn-detail">Detail</a>
+
                         {% if t.sisa > 0 %}
                             <button type="button" class="btn-upload" data-bs-toggle="modal" data-bs-target="#modalUpload{{ t.id }}">
                                 Upload Bukti
                             </button>
                         {% else %}
-                            <span style="color: gray; font-size: 13px;">Selesai</span>
+                            <span style="color: gray; font-size: 13px; display: block; margin-top: 3px;">Selesai</span>
                         {% endif %}
                     </td>
                 </tr>
@@ -119,7 +137,7 @@
                             <div style="margin-bottom: 15px;">
                                 <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">Jumlah Bayar (Rp)</label>
                                 <input type="number" name="jumlah_bayar" class="form-control" value="{{ t.sisa }}" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                                <small style="color: gray; display: block; margin-top: 3px;">Sisa tagihan: Rp {{ t.sisa }}</small>
+                                <small style="color: gray; display: block; margin-top: 3px;">Sisa tagihan: Rp {{ t.sisa|intcomma }}</small>
                             </div>
                             <div style="margin-bottom: 15px;">
                                 <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">Pilih Foto Bukti Transfer</label>

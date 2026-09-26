@@ -1,0 +1,109 @@
+/* Custom Landing Page CSS for Wisma 24 Putra */
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: #334155;
+    background-color: #f8fafc;
+    scroll-behavior: smooth;
+    padding-top: 76px;
+}
+
+.navbar {
+    transition: all 0.3s ease;
+}
+
+.navbar-brand {
+    font-size: 1.25rem;
+    letter-spacing: -0.5px;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: #475569 !important;
+    transition: color 0.2s ease;
+    padding: 0.5rem 1rem !important;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: #2563eb !important;
+}
+
+.hero-section {
+    min-height: calc(100vh - 76px);
+    background: linear-gradient(135deg, #f0f4ff 0%, #f8fafc 100%);
+    position: relative;
+    overflow: hidden;
+    padding: 60px 0;
+}
+
+.hero-blob {
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    background: rgba(37, 99, 235, 0.08);
+    filter: blur(60px);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+}
+
+.facility-card {
+    transition: transform 0.3s ease, shadow 0.3s ease;
+    border: 1px solid #e2e8f0 !important;
+}
+
+.facility-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+    border-color: #cbd5e1 !important;
+}
+
+.wa-float {
+    position: fixed;
+    width: 60px;
+    height: 60px;
+    bottom: 30px;
+    right: 30px;
+    background-color: #25d366;
+    color: #FFF;
+    border-radius: 50px;
+    text-align: center;
+    font-size: 32px;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.wa-float:hover {
+    background-color: #20ba5a;
+    color: #FFF;
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(37, 211, 102, 0.6);
+}
+
+.tracking-wider {
+    letter-spacing: 0.05em;
+}
+
+.bg-primary-subtle {
+    background-color: #eff6ff !important;
+}
+
+.text-primary {
+    color: #2563eb !important;
+}
+
+.btn-primary {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+
+.btn-primary:hover {
+    background-color: #1d4ed8;
+    border-color: #1d4ed8;
+}

@@ -3,50 +3,50 @@
 
 {% block content %}
 <style>
-    /* Mengurangi margin body agar container lebih naik */
     .container {
-        max-width: 450px;
-        margin: 10px auto; /* Jarak atas diperkecil */
+        max-width: 460px; /* Ukuran pas, tidak terlalu besar/kecil */
+        margin: 5px auto;
         background: white;
-        padding: 20px; /* Padding dikurangi */
+        padding: 15px 22px;
         border-radius: 10px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
-    h2 { text-align: center; margin-bottom: 15px; font-size: 22px; }
+    h2 { text-align: center; margin-bottom: 10px; font-size: 20px; }
 
-    label { font-size: 12px; font-weight: bold; margin-bottom: 2px; display: block; }
+    label { font-size: 11px; font-weight: bold; margin-bottom: 2px; display: block; color: #333; }
 
     input {
         width: 100%;
-        padding: 8px; /* Input lebih tipis */
-        margin-bottom: 10px;
+        padding: 7px 10px;
+        margin-bottom: 8px;
         border: 1px solid #ddd;
         border-radius: 6px;
-        font-size: 13px;
+        font-size: 12px;
     }
 
-    .btn-group { display: flex; gap: 10px; margin-top: 5px; }
+    .btn-group { display: flex; gap: 8px; margin-top: 5px; }
 
     .btn {
         flex: 1;
-        padding: 8px;
+        padding: 7px;
         border: none;
         border-radius: 6px;
         cursor: pointer;
         font-weight: bold;
-        font-size: 14px;
+        font-size: 13px;
     }
 
     img {
         width: 100%;
-        max-width: 150px; /* Foto diperkecil agar tidak makan tempat */
-        margin: 5px auto;
+        max-width: 120px; /* Ukuran foto KTP pas */
+        margin: 4px auto;
         display: block;
-        border-radius: 8px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
     }
 
-    .alert { padding: 5px; margin-bottom: 10px; border-radius: 6px; text-align: center; font-size: 12px; }
+    .alert { padding: 5px; margin-bottom: 8px; border-radius: 6px; text-align: center; font-size: 11px; }
 </style>
 
 <div class="container">
@@ -70,11 +70,14 @@
         <label>NIK</label>
         <input type="text" name="nik" value="{{ penyewa.nik }}">
 
+        <label>Tanggal Masuk</label>
+        <input type="date" name="tanggal_masuk" value="{{ penyewa.tanggal_masuk|date:'Y-m-d' }}">
+
         <label>Upload KTP</label>
-        <input type="file" name="foto_ktp">
+        <input type="file" name="foto_ktp" style="padding: 4px;">
 
         {% if penyewa.foto_ktp %}
-            <p style="font-size: 11px; margin: 0;">Foto Saat Ini:</p>
+            <p style="font-size: 11px; margin: 0; text-align: center; color: #666;">Foto Saat Ini:</p>
             <img src="{{ penyewa.foto_ktp.url }}">
         {% endif %}
 
